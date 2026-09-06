@@ -1,6 +1,7 @@
 "use client"
 import { motion } from 'framer-motion'
 import ProjectCard from '../projects/ProjectCard';
+import ProjectDetailsModal from '../projects/ProjectDetailsModal';
 
 const mockProject = [
   {
@@ -70,7 +71,10 @@ const Projects = () => {
               viewport={{ once: true, margin: "-50px" }}
               transition={{ delay: 0.1 * i, duration: 0.5 }}
             >
-              <ProjectCard project={project} />
+              <ProjectDetailsModal
+                Trigger={<ProjectCard project={project} />}
+                project={project}
+              />
             </motion.div>
           ))}
         </div>

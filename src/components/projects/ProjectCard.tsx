@@ -14,7 +14,7 @@ const ProjectCard = ({
 
   return (
     <motion.div
-      className='group bg-surface rounded-lg border border-border hover:border-code-accent/40 p-6 hover:bg-secondary hover:-translate-y-1 transition-all duration-300 cursor-pointer relative overflow-hidden'
+      className='group bg-surface rounded-lg border border-border hover:border-code-accent/30 p-6 hover:bg-secondary/50 hover:-translate-y-1 transition-all duration-300 cursor-pointer relative overflow-hidden'
     >
       <div className='flex justify-between items-start mb-6'>
         <motion.p
@@ -32,7 +32,7 @@ const ProjectCard = ({
         />
       </div>
 
-      <div className="mb-6">
+      <div className="mb-6 text-left">
         <h3 className='text-xl font-medium mb-3 text-foreground group-hover:text-code-accent transition-colors duration-300'>
           {project.title}
         </h3>
