@@ -1,0 +1,58 @@
+@use "reset.scss";
+@use "utilities.scss";
+@use "sass:map";
+
+.log-command {
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.log-muted {
+    color: var(--text-muted);
+}
+
+.log-info {
+    color: var(--text-secondary);
+}
+
+.log-success {
+    color: var(--success);
+    font-weight: 500;
+}
+
+.log-error {
+    color: var(--danger);
+}
+
+.log-accent {
+    color: var(--code-accent);
+}
+
+.log-empty {
+    height: 1em;
+}
+
+html {
+    scroll-behavior: smooth;
+
+    @media (prefers-reduced-motion: reduce) {
+        scroll-behavior: auto;
+    }
+}
+
+section {
+    scroll-margin-top: 4.375rem;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--text-primary) !important;
+    -webkit-box-shadow: 0 0 0px 1000px var(--surface) inset !important;
+    box-shadow: 0 0 0px 1000px var(--surface) inset !important;
+    background-color: transparent !important;
+    transition: background-color 5000s ease-in-out 0s;
+}

@@ -1,0 +1,178 @@
+@import "tailwindcss";
+
+/* Dark Mode (Default) */
+:root {
+  --page: hsl(220 15% 6%);
+  --surface: hsl(220 15% 10%);
+  --surface-raised: hsl(220 15% 14%);
+
+  --text-primary: hsl(0 0% 90%);
+  --text-secondary: hsl(220 8% 70%);
+  --text-muted: hsl(220 8% 55%);
+  --text-on-accent: hsl(220 15% 6%);
+
+  --primary: hsl(0 0% 90%);
+  --secondary: hsl(220 15% 14%);
+  --accent: hsl(38 92% 55%);
+  --accent-hover: hsl(38 92% 60%);
+
+  --success: hsl(142 71% 45%);
+  --danger: hsl(0 84% 60%);
+  --warning: hsl(38 92% 55%);
+
+  --border: hsl(220 15% 18%);
+  --border-strong: hsl(220 15% 25%);
+  --input: hsl(220 15% 18%);
+  --ring: hsl(38 92% 55%);
+
+  --code-bg: hsl(220 15% 12%);
+  --code-text: hsl(0 0% 90%);
+  --code-accent: hsl(262 83% 68%);
+
+  --sidebar-background: hsl(220 15% 6%);
+  --sidebar-foreground: hsl(0 0% 90%);
+  --sidebar-primary: hsl(0 0% 90%);
+  --sidebar-primary-foreground: hsl(220 15% 6%);
+  --sidebar-accent: hsl(220 15% 14%);
+  --sidebar-accent-foreground: hsl(0 0% 90%);
+  --sidebar-border: hsl(220 15% 18%);
+  --sidebar-ring: hsl(38 92% 55%);
+
+  --radius: 0.75rem;
+  --container-app: 1060px;
+
+  --font-sans: "Manrope", system-ui, -apple-system, sans-serif;
+  --font-mono: "DM Mono", "SFMono-Regular", Consolas, monospace;
+}
+
+/* Light Mode */
+.light {
+  --page: hsl(0 0% 98%);
+  --surface: hsl(0 0% 100%);
+  --surface-raised: hsl(220 14% 96%);
+
+  --text-primary: hsl(220 15% 15%);
+  --text-secondary: hsl(220 10% 35%);
+  --text-muted: hsl(220 8% 45%);
+  --text-on-accent: hsl(0 0% 98%);
+
+  --primary: hsl(220 15% 15%);
+  --secondary: hsl(220 14% 94%);
+  --accent: hsl(38 92% 50%);
+  --accent-hover: hsl(38 92% 55%);
+
+  --success: hsl(142 71% 35%);
+  --danger: hsl(0 72% 45%);
+  --warning: hsl(38 92% 50%);
+
+  --border: hsl(220 14% 88%);
+  --border-strong: hsl(220 14% 80%);
+  --input: hsl(220 14% 88%);
+  --ring: hsl(38 92% 50%);
+
+  --code-bg: hsl(220 14% 94%);
+  --code-text: hsl(220 15% 15%);
+  --code-accent: hsl(262 83% 58%);
+
+  --sidebar-background: hsl(0 0% 98%);
+  --sidebar-foreground: hsl(220 15% 15%);
+  --sidebar-primary: hsl(220 15% 15%);
+  --sidebar-primary-foreground: hsl(0 0% 98%);
+  --sidebar-accent: hsl(220 14% 94%);
+  --sidebar-accent-foreground: hsl(220 15% 15%);
+  --sidebar-border: hsl(220 14% 88%);
+  --sidebar-ring: hsl(38 92% 50%);
+
+  --radius: 0.75rem;
+  --container-app: 1060px;
+
+  --font-sans: "Manrope", system-ui, -apple-system, sans-serif;
+  --font-mono: "DM Mono", "SFMono-Regular", Consolas, monospace;
+}
+
+:root {
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+}
+
+@theme inline {
+  --color-page: var(--page);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-text-on-accent: var(--text-on-accent);
+
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+  --color-warning: var(--warning);
+
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-code-bg: var(--code-bg);
+  --color-code-text: var(--code-text);
+  --color-code-accent: var(--code-accent);
+
+  --color-sidebar: var(--sidebar-background);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+
+  --container-app: 1060px;
+  --breakpoint-app: 1060px;
+}
+
+/* Base styles */
+body {
+  background-color: var(--color-page);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Text selection */
+::selection {
+  background: color-mix(in srgb, var(--accent) 30%, transparent);
+  color: var(--text-primary);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--page);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
