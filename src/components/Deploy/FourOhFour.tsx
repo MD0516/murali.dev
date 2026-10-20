@@ -3,6 +3,11 @@
 import { ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion'
 import ThemeToggle from '../ui/ThemeToggle';
+import { useSession } from '@/api/queries/auth';
+import { useProjectsQuery } from '@/api/queries/projects';
+import { useSkillsQuery } from '@/api/queries/skills';
+import { useAboutQuery } from '@/api/queries/about';
+import { useTimelineQuery } from '@/api/queries/timeline';
 
 type Props = {
     onDeploy: () => void;
@@ -11,6 +16,13 @@ type Props = {
 const FourOhFour = ({
     onDeploy
 }: Props) => {
+
+    useSession()
+    useProjectsQuery()
+    useSkillsQuery()
+    useAboutQuery()
+    useTimelineQuery()
+
     return (
         <div className='relative flex min-h-screen items-center justify-center'>
             <motion.div

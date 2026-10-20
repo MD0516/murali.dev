@@ -57,3 +57,27 @@ export const GmailIcon = forwardRef<SVGSVGElement, IconProps>(
   )
 );
 GmailIcon.displayName = "GmailIcon";
+
+export const LogoIcon = forwardRef<SVGSVGElement, IconProps>(
+  ({ size = 24, className = "", ...props }, ref) => (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 100 100"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      {...props}
+    >
+      <path
+        d="M 16 18 L 48 50 L 16 82"
+        fill="none"
+        stroke="var(--code-accent)"
+        stroke-width="13"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+      <rect x="54" y="68" width="32" height="13" rx="6.5" fill="var(--sidebar-primary)" />
+    </svg>
+  )
+);
+LogoIcon.displayName = "LogoIcon"

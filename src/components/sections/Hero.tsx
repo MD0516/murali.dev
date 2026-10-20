@@ -140,9 +140,7 @@ const Hero = () => {
         className="w-[30%] hidden lg:block"
       >
         <motion.div
-          whileHover={{ scale: 1.02 }}
-          transition={{ duration: 0.3 }}
-          className='overflow-hidden rounded-xl border border-border bg-surface shadow-[0_0_70px_color-mix(in_srgb,var(--color-code-accent)_30%,transparent)] cursor-pointer'
+          className='overflow-hidden rounded-xl border border-border bg-surface shadow-[0_0_70px_color-mix(in_srgb,var(--color-code-accent)_30%,transparent)]'
         >
           <div className='flex items-center h-12 px-4 border-b border-border'>
             <div className="flex gap-1.5">

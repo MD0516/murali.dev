@@ -3,8 +3,10 @@ import { motion, AnimatePresence, useInView } from 'framer-motion'
 import { GithubIcon, GmailIcon, LinkedinIcon } from '../ui/Icons'
 import { useEffect, useRef, useState } from 'react'
 import { ArrowRight } from 'lucide-react'
+import { useContactMutation } from '@/api/queries/contact'
 
 const Contact = () => {
+  const { mutate: contactMutate } = useContactMutation();
   const containerRef = useRef<HTMLDivElement>(null)
   const isInView = useInView(containerRef, { once: true, margin: "-100px" })
 
@@ -18,7 +20,22 @@ const Contact = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    console.log('Form submitted:', formData)
+    contactMutate(
+      {
+        data: {
+          email: formData.email,
+          message: formData.message,
+          name: formData.name,
+        },
+      },
+      {
+        onSuccess: (response) => {
+          if (response.success) {
+            setFormData({ name: '', email: '', message: '' })
+          }
+        },
+      }
+    )
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {

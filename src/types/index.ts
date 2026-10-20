@@ -1,5 +1,5 @@
 export interface Project {
-    id: string;
+    _id: string;
     title: string;
     shortDescription: string;
     fullDescription: string;
@@ -7,16 +7,30 @@ export interface Project {
     imageUrl: string;
     liveUrl?: string;
     githubUrl?: string;
-    featured?: boolean;
+    featured: boolean;
     order: number;
+    isDeleted: Date | null;
+    createdAt: string;
+    updatedAt: string;
 }
 
 
-type TimelineType = "edu" | "work";
-type TimelineStatus = "completed" | "ongoing" | "current";
+export interface Skill {
+    _id: string;
+    category: string;
+    skills: string[];
+    order: number;
+    isDeleted: Date | null;
+    createdAt: string;
+    updatedAt: string;
+}
 
-export interface TimelineEntry {
-    id: string;
+export type TimelineType = "edu" | "work";
+
+export type TimelineStatus = "completed" | "ongoing" | "current";
+
+export interface Timeline {
+    _id: string;
     title: string;
     institution: string;
     description?: string;
@@ -24,4 +38,31 @@ export interface TimelineEntry {
     status: TimelineStatus;
     startDate: string;
     endDate?: string;
+    isDeleted: Date | null;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface About {
+    _id: string;
+    role: string;
+    location: string;
+    bio: string;
+    tagline: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface AdminUser {
+    _id: string;
+    name: string;
+    email: string;
+    isAdmin: boolean;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface ApiResponse<T> {
+    message: string;
+    data: T;
 }

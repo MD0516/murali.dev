@@ -1,8 +1,7 @@
 import { Project } from '@/types';
 import { Dialog } from 'radix-ui'
 import { ReactNode } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { X, ExternalLink, Calendar, ArrowUpRight } from 'lucide-react'
+import { X, ExternalLink, ArrowUpRight } from 'lucide-react'
 import { GithubIcon } from '../ui/Icons';
 
 type Props = {
@@ -92,7 +91,7 @@ const ProjectDetailsModal = ({
                 $ cat tech-stack.txt
               </h3>
               <div className="flex flex-wrap gap-2">
-                {project.techStack.map((tech, i) => (
+                {project.techStack.map((tech) => (
                   <span
                     key={tech}
                     className="px-2.5 py-1 text-xs bg-secondary rounded text-text-muted hover:bg-code-accent/10 hover:text-code-accent transition-colors duration-200"

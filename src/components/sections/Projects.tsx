@@ -2,24 +2,16 @@
 import { motion } from 'framer-motion'
 import ProjectCard from '../projects/ProjectCard';
 import ProjectDetailsModal from '../projects/ProjectDetailsModal';
-
-const mockProject = [
-  {
-    id: "1",
-    title: "Learning Management System",
-    shortDescription: "Full-stack LMS with role-based auth and 100+ REST APIs, built solo during a production internship.",
-    fullDescription:
-      "Designed and built a complete Learning Management System from the ground up during my internship at ARKFA Technologies. Implemented JWT-based authentication with role-based access control (RBAC) supporting distinct permission levels for admins, instructors, and students. Built and documented over 100 REST API endpoints covering course management, enrollment, content delivery, and user administration. Deployed on Google Cloud Run for scalable, containerized hosting. This was my primary hands-on production experience, taking a real system from architecture through deployment.",
-    techStack: ["React", "Node.js", "Express", "MongoDB", "JWT", "Google Cloud Run"],
-    imageUrl: "/projects/lms-screenshot.png",
-    liveUrl: undefined,
-    githubUrl: undefined,
-    featured: true,
-    order: 1,
-  },
-];
+import { useProjectsQuery } from '@/api/queries/projects';
+import ProjectFormModal from '../admin/ProjectFormModal';
+import { useAppContext } from '@/context/context';
 
 const Projects = () => {
+  const { data: projects, isLoading } = useProjectsQuery();
+  const { isAdmin } = useAppContext()
+  if (isLoading) {
+    return null;
+  }
   return (
     <section id='projects' className="w-full pb-20 pt-15">
       <motion.div
@@ -49,8 +41,9 @@ const Projects = () => {
           <h2 className='text-3xl font-medium tracking-[0.04em] text-foreground'>
             A few things I&apos;ve made.
           </h2>
-          <div className="font-mono text-xs text-text-muted flex items-center gap-2">
+          <div className="font-mono text-xs text-text-muted flex items-center gap-4">
             <p>(03 projects)</p>
+            {isAdmin && <ProjectFormModal />}
           </div>
         </motion.div>
       </motion.div>
@@ -63,9 +56,9 @@ const Projects = () => {
         className='max-w-6xl'
       >
         <div className='w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'>
-          {mockProject.map((project, i) => (
+          {projects?.map((project, i) => (
             <motion.div
-              key={project.id}
+              key={project._id}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-50px" }}

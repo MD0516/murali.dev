@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "../styles/theme.css";
 import "../styles/globals.scss";
+import Provider from "./provider";
+import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://murali.dev"),
@@ -79,7 +81,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <link rel="alternate icon" href="/favicon-dark.ico" />
       </head>
       <body className="min-h-full flex flex-col">
-        {children}
+        <Provider>
+          <Toaster position="top-right" closeButton />
+          {children}
+        </Provider>
       </body>
     </html>
   );
