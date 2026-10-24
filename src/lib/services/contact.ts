@@ -1,31 +1,36 @@
-import { Resend } from "resend";
 import { ContactPayload } from "../validators/contact";
 import connectDB from "../db";
 import Message from "../models/message";
 import ContactNotification from "@/components/emails/ContactNotification";
 import ContactAutoReply from "@/components/emails/ContactAutoReply";
+import { render } from "@react-email/components";
+import { transporter } from "../mailer";
 
-const resend = new Resend(process.env.RESEND_API_KEY)
 
 export const sendMessage = async (data: ContactPayload): Promise<boolean> => {
     await connectDB();
     await Message.create(data)
 
-    await Promise.all([
-        resend.emails.send({
-            from: "Portfolio Contact <onboarding@resend.dev>",
-            to: "msmurali2005@gmail.com",
+    const [notificationHtml, autoReplyHtml] = await Promise.all([
+        render(ContactNotification(data)),
+        render(ContactAutoReply({ name: data.name })),
+    ])
+
+    await Promise.allSettled([
+        transporter.sendMail({
+            from: `Portfolio Contact <${process.env.SMTP_USER}>`,
+            to: process.env.CONTACT_EMAIL,
             replyTo: data.email,
             subject: `New message from ${data.name}`,
-            react: ContactNotification({ name: data.name, email: data.email, message: data.message })
+            html: notificationHtml,
         }),
-        resend.emails.send({
-            from: "Murali Dharan <onboarding@resend.dev>",
-            to: [data.email],
-            replyTo: "msmurali2005@gmail.com",
+        transporter.sendMail({
+            from: `Murali Dharan <${process.env.SMTP_USER}>`,
+            to: data.email,
+            replyTo: data.email,
             subject: "Thanks for reaching out!",
-            react: ContactAutoReply({ name: data.name }),
-        })
+            html: autoReplyHtml,
+        }),
     ])
 
     return true;
