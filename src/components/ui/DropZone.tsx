@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useCallback, useId, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useId, useRef, useState } from 'react'
 import {
     UploadCloud,
     File,
@@ -11,17 +11,19 @@ import {
     FileVideo,
     FileAudio,
     X,
-    CheckCircle2,
     AlertCircle,
+    Pencil,
 } from 'lucide-react'
+import Image from 'next/image'
 
 /* ---------------------------------------------
    Types
    --------------------------------------------- */
 
-type AcceptedFile = {
+export type AcceptedFile = {
     id: string
     file: File
+    /** Auto-generated blob URL for image files (for preview) */
     preview?: string
 }
 
@@ -33,14 +35,14 @@ type DropZoneProps = {
     required?: boolean
     disabled?: boolean
 
-    /** Comma-separated list, e.g. "image/*,.pdf" */
     accept?: string
-    /** Max file size in bytes (default 10 MB) */
     maxSize?: number
-    /** Max number of files (default 5) */
     maxFiles?: number
-    /** Allow multiple files (default true) */
     multiple?: boolean
+
+    /** Existing image URL (e.g. from server). Lower priority than a freshly picked file. */
+    imageUrl?: string
+    imageAlt?: string
 
     files?: AcceptedFile[]
     onFilesChange?: (files: AcceptedFile[]) => void
@@ -101,19 +103,12 @@ const uid = () => Math.random().toString(36).slice(2, 10)
 
 const getAcceptLabels = (accept?: string): string => {
     if (!accept) return 'Any file type'
-
     return accept
         .split(',')
         .map((rule) => {
             const r = rule.trim().toLowerCase()
-
-            // Already an extension
             if (r.startsWith('.')) return r.slice(1).toUpperCase()
-
-            // Wildcard like image/* -> "IMAGE"
             if (r.endsWith('/*')) return r.slice(0, -2).toUpperCase()
-
-            // "image/png" -> "PNG", "image/jpeg" -> "JPEG"
             const sub = r.split('/')[1]
             return sub ? sub.toUpperCase() : r.toUpperCase()
         })
@@ -135,6 +130,8 @@ const DropZone = ({
     maxSize = 10 * 1024 * 1024,
     maxFiles = 5,
     multiple = true,
+    imageUrl,
+    imageAlt = 'Uploaded image',
     files: controlledFiles,
     onFilesChange,
     onError,
@@ -152,17 +149,45 @@ const DropZone = ({
         else setUncontrolledFiles(next)
     }
 
-    const describedBy = [hint && `${id}-hint`, (error || internalError) && `${id}-error`]
-        .filter(Boolean)
-        .join(' ') || undefined
+    const describedBy =
+        [hint && `${id}-hint`, (error || internalError) && `${id}-error`]
+            .filter(Boolean)
+            .join(' ') || undefined
 
     const hasError = Boolean(error || internalError)
     const displayedError = error || internalError
+
+    // --------------------------------------------------------------
+    // Preview priority:
+    //   1. newly selected image file (blob preview)
+    //   2. existing imageUrl from server
+    // --------------------------------------------------------------
+    const selectedImage = files.find(
+        (f) => f.preview && f.file.type.startsWith('image/'),
+    )
+    const previewUrl = selectedImage?.preview ?? imageUrl
+    const previewAlt = selectedImage?.file.name ?? imageAlt
+    const showPreview = Boolean(previewUrl)
+
+    // Files that don't have a renderable image preview (non-images, or images
+    // outside `files` we're already displaying). We still want to show them in
+    // the file list.
+    const listableFiles = files.filter((f) => f.id !== selectedImage?.id)
 
     const reportError = (msg: string) => {
         setInternalError(msg)
         onError?.(msg)
     }
+
+    // Cleanup any blob URLs on unmount to avoid leaks
+    useEffect(() => {
+        return () => {
+            files.forEach((f) => {
+                if (f.preview) URL.revokeObjectURL(f.preview)
+            })
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
 
     /* -------------------------
        File processing
@@ -179,17 +204,35 @@ const DropZone = ({
                     continue
                 }
                 if (file.size > maxSize) {
-                    reportError(`"${file.name}" is ${formatBytes(file.size)} — max is ${formatBytes(maxSize)}.`)
+                    reportError(
+                        `"${file.name}" is ${formatBytes(file.size)} — max is ${formatBytes(maxSize)}.`,
+                    )
                     continue
                 }
-                // prevent duplicates by name+size
-                if (files.some((f) => f.file.name === file.name && f.file.size === file.size)) continue
-                validated.push({ id: uid(), file })
+                if (
+                    files.some(
+                        (f) => f.file.name === file.name && f.file.size === file.size,
+                    )
+                )
+                    continue
+
+                const preview = file.type.startsWith('image/')
+                    ? URL.createObjectURL(file)
+                    : undefined
+                validated.push({ id: uid(), file, preview })
             }
 
             if (!validated.length) return
 
             const combined = multiple ? [...files, ...validated] : [validated[0]]
+
+            // If replacing the only file, revoke any old blob URLs that are dropped
+            if (!multiple) {
+                files.forEach((f) => {
+                    if (f.preview) URL.revokeObjectURL(f.preview)
+                })
+            }
+
             if (combined.length > maxFiles) {
                 reportError(`You can upload up to ${maxFiles} files.`)
             }
@@ -225,7 +268,7 @@ const DropZone = ({
 
     const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files?.length) processFiles(e.target.files)
-        e.target.value = '' // reset so same file can be reselected
+        e.target.value = ''
     }
 
     const openPicker = () => {
@@ -241,147 +284,222 @@ const DropZone = ({
     }
 
     const removeFile = (fileId: string) => {
+        const removed = files.find((f) => f.id === fileId)
+        if (removed?.preview) URL.revokeObjectURL(removed.preview)
         updateFiles(files.filter((f) => f.id !== fileId))
         setInternalError('')
     }
 
     /* -------------------------
-       Render
+       Render — Preview mode
+       ------------------------- */
+    const renderPreview = () => (
+        <div
+            onDrop={onDrop}
+            onDragOver={onDragOver}
+            onDragEnter={onDragOver}
+            onDragLeave={onDragLeave}
+            className="space-y-3"
+        >
+            <div
+                className={[
+                    'group relative overflow-hidden rounded-lg border bg-surface-raised transition-all',
+                    isDragging ? 'border-accent ring-2 ring-accent/40' : 'border-border',
+                ].join(' ')}
+            >
+                <Image
+                    src={previewUrl!}
+                    alt={previewAlt}
+                    width={800}
+                    height={450}
+                    unoptimized={previewUrl?.startsWith('blob:')}
+                    className="pointer-events-none h-48 w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+                />
+
+                {/* Change overlay */}
+                <button
+                    type="button"
+                    onClick={openPicker}
+                    disabled={disabled}
+                    className="absolute inset-0 flex cursor-pointer items-center justify-center gap-2 bg-black/0 font-mono text-sm font-medium text-transparent backdrop-blur-0 transition-all duration-200 group-hover:bg-black/50 group-hover:text-text-primary group-hover:backdrop-blur-[2px] focus-visible:bg-black/50 focus-visible:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                    <Pencil className="h-4 w-4" strokeWidth={2} />
+                    <span className="uppercase tracking-wider">Change</span>
+                </button>
+
+                {/* Drop hint shown only while dragging over the preview */}
+                {isDragging && (
+                    <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-accent/10 backdrop-blur-[1px]">
+                        <span className="rounded-md bg-surface/90 px-3 py-1.5 font-mono text-xs uppercase tracking-wider text-accent">
+                            Drop to replace
+                        </span>
+                    </div>
+                )}
+            </div>
+
+            <p className="flex items-center justify-center gap-1.5 font-mono text-xs text-text-muted">
+                <UploadCloud className="h-3.5 w-3.5" strokeWidth={1.75} />
+                Drag &amp; drop a new image to update, or click the preview to browse.
+            </p>
+        </div>
+    )
+
+    /* -------------------------
+       Render — Drop area
+       ------------------------- */
+    const renderDropArea = () => (
+        <div
+            role="button"
+            tabIndex={disabled ? -1 : 0}
+            aria-label="Upload files by dragging and dropping, or click to browse"
+            aria-describedby={describedBy}
+            aria-disabled={disabled || undefined}
+            onClick={openPicker}
+            onKeyDown={onKeyDown}
+            onDrop={onDrop}
+            onDragOver={onDragOver}
+            onDragEnter={onDragOver}
+            onDragLeave={onDragLeave}
+            className={[
+                'group relative flex flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed px-6 py-10 text-center transition-all duration-200 outline-none',
+                'focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:border-accent',
+                disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer',
+                isDragging
+                    ? 'border-accent bg-accent/5 scale-[1.01]'
+                    : hasError
+                        ? 'border-danger hover:border-danger'
+                        : 'border-border hover:border-border-strong hover:bg-surface-raised',
+            ].join(' ')}
+        >
+            <div
+                className={[
+                    'flex h-12 w-12 items-center justify-center rounded-full transition-colors duration-200',
+                    isDragging
+                        ? 'bg-accent/15 text-accent'
+                        : 'bg-surface-raised text-text-muted group-hover:text-accent',
+                ].join(' ')}
+            >
+                <UploadCloud className="h-6 w-6" strokeWidth={1.75} />
+            </div>
+
+            <div className="space-y-1">
+                <p className="font-mono text-sm text-text-primary">
+                    {isDragging ? (
+                        <span className="text-accent">Drop files to upload</span>
+                    ) : (
+                        <>
+                            <span className="text-accent underline underline-offset-4 decoration-dotted">
+                                Click to upload
+                            </span>
+                            <span className="text-text-muted"> or drag and drop</span>
+                        </>
+                    )}
+                </p>
+                <p className="font-mono text-xs text-text-muted">
+                    {getAcceptLabels(accept)}
+                    {' · '}
+                    Up to {formatBytes(maxSize)}
+                    {multiple && ` · ${maxFiles} ${maxFiles === 1 ? 'file' : 'files'} max`}
+                </p>
+            </div>
+        </div>
+    )
+
+    /* -------------------------
+       Render — File list (non-image files, or extras)
+       ------------------------- */
+    const renderFileList = () =>
+        listableFiles.length > 0 && (
+            <ul className="mt-3 space-y-2">
+                {listableFiles.map(({ id: fileId, file }) => {
+                    const Icon = getFileIcon(file.type)
+                    return (
+                        <li
+                            key={fileId}
+                            className="group flex items-center gap-3 rounded-md border border-border bg-surface px-3 py-2 transition-colors hover:border-border-strong"
+                        >
+                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-surface-raised text-code-accent">
+                                <Icon className="h-4 w-4" strokeWidth={1.75} />
+                            </div>
+
+                            <div className="min-w-0 flex-1">
+                                <p className="truncate font-mono text-sm text-text-primary">
+                                    {file.name}
+                                </p>
+                                <p className="font-mono text-xs text-text-muted">
+                                    {formatBytes(file.size)}
+                                </p>
+                            </div>
+
+                            <button
+                                type="button"
+                                onClick={(e) => {
+                                    e.stopPropagation()
+                                    removeFile(fileId)
+                                }}
+                                disabled={disabled}
+                                aria-label={`Remove ${file.name}`}
+                                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-text-muted transition-colors hover:bg-danger/10 hover:text-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger/40 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                <X className="h-3.5 w-3.5" />
+                            </button>
+                        </li>
+                    )
+                })}
+            </ul>
+        )
+
+    /* -------------------------
+       Final render
        ------------------------- */
     return (
         <div className="w-full">
             {label && (
-                <label htmlFor={`${id}-input`} className="mb-1.5 block font-mono text-xs font-medium uppercase tracking-wider text-text-secondary">
+                <label
+                    htmlFor={`${id}-input`}
+                    className="mb-1.5 block font-mono text-xs font-medium uppercase tracking-wider text-text-secondary"
+                >
                     {label}
                     {required && (
                         <span aria-hidden="true" className="text-danger">
-                            {' '}*
+                            {' '}
+                            *
                         </span>
                     )}
                 </label>
             )}
 
-            {/* Drop area */}
-            <div
-                role="button"
-                tabIndex={disabled ? -1 : 0}
-                aria-label="Upload files by dragging and dropping, or click to browse"
-                aria-describedby={describedBy}
-                aria-disabled={disabled || undefined}
-                onClick={openPicker}
-                onKeyDown={onKeyDown}
-                onDrop={onDrop}
-                onDragOver={onDragOver}
-                onDragEnter={onDragOver}
-                onDragLeave={onDragLeave}
-                className={[
-                    'group relative flex flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed px-6 py-10 text-center transition-all duration-200 outline-none',
-                    'focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:border-accent',
-                    disabled
-                        ? 'cursor-not-allowed opacity-50'
-                        : 'cursor-pointer',
-                    isDragging
-                        ? 'border-accent bg-accent/5 scale-[1.01]'
-                        : hasError
-                            ? 'border-danger hover:border-danger'
-                            : 'border-border hover:border-border-strong hover:bg-surface-raised',
-                ].join(' ')}
-            >
-                <input
-                    ref={inputRef}
-                    id={`${id}-input`}
-                    type="file"
-                    name={name}
-                    accept={accept}
-                    multiple={multiple}
-                    onChange={onInputChange}
-                    disabled={disabled}
-                    className="sr-only"
-                />
+            <input
+                ref={inputRef}
+                id={`${id}-input`}
+                type="file"
+                name={name}
+                accept={accept}
+                multiple={multiple}
+                onChange={onInputChange}
+                disabled={disabled}
+                className="sr-only"
+            />
 
-                {/* Icon badge */}
-                <div
-                    className={[
-                        'flex h-12 w-12 items-center justify-center rounded-full transition-colors duration-200',
-                        isDragging
-                            ? 'bg-accent/15 text-accent'
-                            : 'bg-surface-raised text-text-muted group-hover:text-accent',
-                    ].join(' ')}
-                >
-                    <UploadCloud className="h-6 w-6" strokeWidth={1.75} />
-                </div>
+            {showPreview ? renderPreview() : renderDropArea()}
 
-                <div className="space-y-1">
-                    <p className="font-mono text-sm text-text-primary">
-                        {isDragging ? (
-                            <span className="text-accent">Drop files to upload</span>
-                        ) : (
-                            <>
-                                <span className="text-accent underline underline-offset-4 decoration-dotted">Click to upload</span>
-                                <span className="text-text-muted"> or drag and drop</span>
-                            </>
-                        )}
-                    </p>
-                    <p className="font-mono text-xs text-text-muted">
-                        {getAcceptLabels(accept)}
-                        {' · '}
-                        Up to {formatBytes(maxSize)}
-                        {multiple && ` · ${maxFiles} ${maxFiles === 1 ? 'file' : 'files'} max`}
-                    </p>
-                </div>
-            </div>
-
-            {/* Hints / errors */}
             {hint && !displayedError && (
                 <p id={`${id}-hint`} className="mt-1.5 font-mono text-xs text-text-muted">
                     {hint}
                 </p>
             )}
             {displayedError && (
-                <p id={`${id}-error`} role="alert" className="mt-1.5 flex items-center gap-1 font-mono text-xs text-danger">
+                <p
+                    id={`${id}-error`}
+                    role="alert"
+                    className="mt-1.5 flex items-center gap-1 font-mono text-xs text-danger"
+                >
                     <AlertCircle className="h-3.5 w-3.5 shrink-0" />
                     {displayedError}
                 </p>
             )}
 
-            {/* File list */}
-            {files.length > 0 && (
-                <ul className="mt-3 space-y-2">
-                    {files.map(({ id: fileId, file }) => {
-                        const Icon = getFileIcon(file.type)
-                        return (
-                            <li
-                                key={fileId}
-                                className="group flex items-center gap-3 rounded-md border border-border bg-surface px-3 py-2 transition-colors hover:border-border-strong"
-                            >
-                                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-surface-raised text-code-accent">
-                                    <Icon className="h-4 w-4" strokeWidth={1.75} />
-                                </div>
-
-                                <div className="min-w-0 flex-1">
-                                    <p className="truncate font-mono text-sm text-text-primary">{file.name}</p>
-                                    <p className="font-mono text-xs text-text-muted">{formatBytes(file.size)}</p>
-                                </div>
-
-                                <CheckCircle2 className="h-4 w-4 shrink-0 text-success" aria-label="Uploaded" />
-
-                                <button
-                                    type="button"
-                                    onClick={(e) => {
-                                        e.stopPropagation()
-                                        removeFile(fileId)
-                                    }}
-                                    disabled={disabled}
-                                    aria-label={`Remove ${file.name}`}
-                                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-text-muted transition-colors hover:bg-danger/10 hover:text-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger/40 disabled:cursor-not-allowed disabled:opacity-50"
-                                >
-                                    <X className="h-3.5 w-3.5" />
-                                </button>
-                            </li>
-                        )
-                    })}
-                </ul>
-            )}
+            {renderFileList()}
         </div>
     )
 }

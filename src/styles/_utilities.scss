@@ -42,7 +42,7 @@
     }
 
     &:focus-visible:not(:disabled) {
-        outline: 2px solid var(--color-ring);
+        outline: 2px solid var(--ring);
         outline-offset: 2px;
     }
 }
@@ -52,48 +52,48 @@
    ============================================ */
 
 $button-variants: (
-    "primary": (bg: var(--color-primary),
-        fg: var(--color-text-on-accent),
-        hover-bg: var(--color-accent),
-        hover-fg: var(--color-accent-foreground),
+    "primary": (bg: var(--primary),
+        fg: var(--text-on-accent),
+        hover-bg: var(--accent),
+        hover-fg: var(--accent-foreground),
     ),
-    "accent": (bg: var(--color-accent),
-        fg: var(--color-text-on-accent),
-        hover-bg: color-mix(in srgb, var(--color-accent) 90%, white),
-        hover-fg: var(--color-text-on-accent),
+    "accent": (bg: var(--accent),
+        fg: var(--text-on-accent),
+        hover-bg: color-mix(in srgb, var(--accent) 90%, white),
+        hover-fg: var(--text-on-accent),
     ),
-    "secondary": (bg: var(--color-secondary),
-        fg: var(--color-text-primary),
-        hover-bg: color-mix(in srgb, var(--color-secondary) 80%, black),
-        hover-fg: var(--color-text-primary),
+    "secondary": (bg: var(--secondary),
+        fg: var(--text-primary),
+        hover-bg: color-mix(in srgb, var(--secondary) 80%, black),
+        hover-fg: var(--text-primary),
     ),
     "ghost": (bg: transparent,
-        fg: var(--color-text-primary),
-        hover-bg: color-mix(in srgb, var(--color-accent) 10%, transparent),
-        hover-fg: var(--color-text-primary),
+        fg: var(--text-primary),
+        hover-bg: color-mix(in srgb, var(--accent) 10%, transparent),
+        hover-fg: var(--text-primary),
     ),
-    "destructive": (bg: var(--color-danger),
-        fg: var(--color-text-on-accent),
-        hover-bg: color-mix(in srgb, var(--color-danger) 90%, black),
-        hover-fg: var(--color-text-on-accent),
+    "destructive": (bg: var(--danger),
+        fg: var(--text-on-accent),
+        hover-bg: color-mix(in srgb, var(--danger) 90%, black),
+        hover-fg: var(--text-on-accent),
     ),
     "link": (bg: transparent,
-        fg: var(--color-primary),
+        fg: var(--primary),
         hover-bg: transparent,
-        hover-fg: var(--color-accent),
+        hover-fg: var(--accent),
     ),
-    "code": (bg: color-mix(in srgb, var(--color-code-accent) 6%, transparent),
-        fg: var(--color-code-accent),
-        hover-bg: color-mix(in srgb, var(--color-code-accent) 13%, transparent),
-        hover-fg: var(--color-text-primary),
-        border: color-mix(in srgb, var(--color-code-accent) 60%, transparent),
-        hover-border: var(--color-code-accent),
+    "code": (bg: color-mix(in srgb, var(--code-accent) 6%, transparent),
+        fg: var(--code-accent),
+        hover-bg: color-mix(in srgb, var(--code-accent) 13%, transparent),
+        hover-fg: var(--text-primary),
+        border: color-mix(in srgb, var(--code-accent) 60%, transparent),
+        hover-border: var(--code-accent),
     ),
     "outline": (bg: transparent,
-        fg: var(--color-text-primary),
-        hover-bg: var(--color-secondary),
-        hover-fg: var(--color-text-primary),
-        border: var(--color-border),
+        fg: var(--text-primary),
+        hover-bg: var(--secondary),
+        hover-fg: var(--text-primary),
+        border: var(--border),
     ),
 );
 
@@ -176,8 +176,8 @@ $button-variants: (
     /* Ghost Button (transparent) */
     .btn-#{$name}-ghost {
         background-color: transparent;
-        color: var(--color-text-muted);
-        border: 1px solid var(--color-border);
+        color: var(--text-muted);
+        border: 1px solid var(--border);
 
         &.scale:hover:not(:disabled) {
             transform: scale(1.02);
@@ -245,16 +245,16 @@ $button-sizes: (
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--border);
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    background-color: var(--color-surface);
-    color: var(--color-text-muted);
+    background-color: var(--surface);
+    color: var(--text-muted);
 
     &:hover:not(:disabled) {
-        background-color: color-mix(in srgb, var(--color-code-accent) 10%, transparent);
-        color: var(--color-text-primary);
-        border-color: color-mix(in srgb, var(--color-code-accent) 60%, transparent);
+        background-color: color-mix(in srgb, var(--code-accent) 10%, transparent);
+        color: var(--text-primary);
+        border-color: color-mix(in srgb, var(--code-accent) 60%, transparent);
     }
 
     &:active:not(:disabled) {
@@ -262,7 +262,7 @@ $button-sizes: (
     }
 
     &:focus-visible:not(:disabled) {
-        outline: 2px solid var(--color-ring);
+        outline: 2px solid var(--ring);
         outline-offset: 2px;
     }
 
@@ -280,14 +280,14 @@ $button-sizes: (
     padding: 0;
     background: none;
     border: none;
-    color: var(--color-text-muted);
+    color: var(--text-muted);
     font-weight: 500;
     font-family: var(--font-mono);
     cursor: pointer;
     transition: color 0.2s ease, text-decoration 0.2s ease;
 
     &:hover:not(:disabled) {
-        color: var(--color-code-accent);
+        color: var(--code-accent);
         text-decoration: underline;
         text-underline-offset: 4px;
     }
@@ -312,18 +312,18 @@ $button-sizes: (
     gap: 0.75rem;
     padding: 0.625rem 1rem;
     border-radius: 9999px;
-    border: 1px solid var(--color-border);
-    background-color: var(--color-surface);
+    border: 1px solid var(--border);
+    background-color: var(--surface);
     font-family: var(--font-mono);
     font-size: 0.625rem;
-    color: var(--color-text-muted);
+    color: var(--text-muted);
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     cursor: pointer;
     transition: all 0.2s ease;
 
     &:hover {
-        border-color: color-mix(in srgb, var(--color-code-accent) 60%, transparent);
-        color: var(--color-text-primary);
+        border-color: color-mix(in srgb, var(--code-accent) 60%, transparent);
+        color: var(--text-primary);
     }
 }
 
@@ -340,17 +340,17 @@ $button-sizes: (
     gap: 0.75rem;
     padding: 1rem;
     border-radius: var(--radius-lg);
-    border: 1px dashed var(--color-border);
-    background-color: var(--color-surface);
+    border: 1px dashed var(--border);
+    background-color: var(--surface);
     font-family: var(--font-mono);
     font-size: 0.75rem;
-    color: var(--color-text-muted);
+    color: var(--text-muted);
     cursor: pointer;
     transition: all 0.2s ease;
 
     &:hover {
-        border-color: var(--color-code-accent);
-        color: var(--color-code-accent);
+        border-color: var(--code-accent);
+        color: var(--code-accent);
     }
 }
 
@@ -364,49 +364,49 @@ $button-sizes: (
     top: 1rem;
     border-radius: var(--radius-md);
     padding: 0.5rem;
-    color: var(--color-text-muted);
+    color: var(--text-muted);
     background: transparent;
     border: none;
     cursor: pointer;
     transition: all 0.2s ease;
 
     &:hover {
-        background-color: var(--color-secondary);
-        color: var(--color-text-primary);
+        background-color: var(--secondary);
+        color: var(--text-primary);
     }
 }
 
 .btn-modal-cancel {
     border-radius: var(--radius-md);
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--border);
     padding: 0.625rem 1rem;
     font-family: var(--font-mono);
     font-size: 0.75rem;
-    color: var(--color-text-muted);
+    color: var(--text-muted);
     background: transparent;
     cursor: pointer;
     transition: all 0.2s ease;
 
     &:hover {
-        background-color: var(--color-secondary);
-        color: var(--color-text-primary);
+        background-color: var(--secondary);
+        color: var(--text-primary);
     }
 }
 
 .btn-modal-save {
     border-radius: var(--radius-md);
-    background-color: var(--color-primary);
+    background-color: var(--primary);
     padding: 0.625rem 1rem;
     font-family: var(--font-mono);
     font-size: 0.75rem;
-    color: var(--color-text-on-accent);
+    color: var(--text-on-accent);
     border: 1px solid transparent;
     cursor: pointer;
     transition: all 0.2s ease;
 
     &:hover {
-        background-color: var(--color-accent);
-        color: var(--color-accent-foreground);
+        background-color: var(--accent);
+        color: var(--accent-foreground);
     }
 }
 
@@ -417,14 +417,14 @@ $button-sizes: (
     gap: 0.5rem;
     font-family: var(--font-mono);
     font-size: 0.75rem;
-    color: var(--color-danger);
+    color: var(--danger);
     background: transparent;
     border: none;
     cursor: pointer;
     transition: color 0.2s ease;
 
     &:hover {
-        color: color-mix(in srgb, var(--color-danger) 80%, white);
+        color: color-mix(in srgb, var(--danger) 80%, white);
     }
 }
 
@@ -435,14 +435,14 @@ $button-sizes: (
 .btn-nav {
     font-family: var(--font-mono);
     font-size: 0.75rem;
-    color: var(--color-text-muted);
+    color: var(--text-muted);
     background: transparent;
     border: none;
     cursor: pointer;
     transition: color 0.2s ease;
 
     &:hover {
-        color: var(--color-code-accent);
+        color: var(--code-accent);
     }
 }
 
@@ -454,7 +454,7 @@ $button-sizes: (
     font-size: 0.875rem;
     font-weight: 700;
     letter-spacing: -0.025em;
-    color: var(--color-text-primary);
+    color: var(--text-primary);
     background: transparent;
     border: none;
     cursor: pointer;
@@ -466,11 +466,11 @@ $button-sizes: (
         align-items: center;
         justify-content: center;
         border-radius: var(--radius-sm);
-        background-color: var(--color-code-accent);
+        background-color: var(--code-accent);
         font-family: var(--font-sans);
         font-size: 0.875rem;
         font-weight: 900;
-        color: var(--color-text-on-accent);
+        color: var(--text-on-accent);
     }
 }
 
@@ -485,15 +485,15 @@ $button-sizes: (
     width: 2.5rem;
     height: 2.5rem;
     border-radius: var(--radius-md);
-    border: 1px solid var(--color-border);
-    background-color: var(--color-surface);
-    color: var(--color-text-muted);
+    border: 1px solid var(--border);
+    background-color: var(--surface);
+    color: var(--text-muted);
     cursor: pointer;
     transition: all 0.2s ease;
 
     &:hover {
-        border-color: color-mix(in srgb, var(--color-code-accent) 60%, transparent);
-        color: var(--color-text-primary);
+        border-color: color-mix(in srgb, var(--code-accent) 60%, transparent);
+        color: var(--text-primary);
     }
 }
 

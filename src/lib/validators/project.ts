@@ -9,7 +9,6 @@ export const createProjectSchema = z.object({
   liveUrl: z.string().optional(),
   githubUrl: z.string().optional(),
   featured: z.boolean().default(false),
-  order: z.number(),
 });
 
 export const updateProjectSchema = createProjectSchema.partial();

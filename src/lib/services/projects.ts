@@ -23,7 +23,14 @@ export const createProject = async (
     await connectDB();
     await requireAdmin();
 
-    const project = await Project.create(data);
+    const projectCount = (await Project.find()).length;
+
+    const payload = {
+        ...data,
+        order: projectCount + 1
+    }
+
+    const project = await Project.create(payload);
 
     return project;
 };
@@ -74,9 +81,9 @@ export const reorderProjects = async (
     await requireAdmin();
 
     await Project.bulkWrite(
-        data.order.map(({ id, order: newOrder }) => ({
+        data.order.map(({ _id, order: newOrder }) => ({
             updateOne: {
-                filter: { _id: id, isDeleted: null },
+                filter: { _id, isDeleted: null },
                 update: { order: newOrder },
             },
         }))

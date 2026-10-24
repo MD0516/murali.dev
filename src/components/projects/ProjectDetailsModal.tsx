@@ -16,7 +16,7 @@ const ProjectDetailsModal = ({
   return (
     <Dialog.Root>
       <Dialog.Trigger asChild>
-        <button>
+        <button className="cursor-pointer">
           {Trigger}
         </button>
       </Dialog.Trigger>

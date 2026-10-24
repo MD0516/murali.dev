@@ -12,9 +12,9 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
         return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
-    validateBody(uploadImageSchema, file)
+    validateBody(uploadImageSchema, {file})
 
     const url = await uploadImage(file);
 
-    return NextResponse.json({ message: "Image uploaded successfully", data: { url } }, { status: 400 });
+    return NextResponse.json({ message: "Image uploaded successfully", data: { url } }, { status: 200 });
 })

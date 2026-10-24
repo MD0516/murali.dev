@@ -109,7 +109,7 @@ const FormField = (props: FormFieldProps) => {
             disabled={disabled}
             aria-invalid={hasError || undefined}
             aria-describedby={describedBy}
-            className={`${baseControl} ${controlBorder(hasError)} min-h-[100px] resize-y`}
+            className={`${baseControl} ${controlBorder(hasError)} min-h-25 resize-y`}
           />
         )
 
@@ -238,7 +238,7 @@ const FormField = (props: FormFieldProps) => {
             disabled={disabled}
             aria-invalid={hasError || undefined}
             aria-describedby={describedBy}
-            className={`${baseControl} ${controlBorder(hasError)}`}
+            className={`${baseControl} ${controlBorder(hasError)} ${type === 'number' ? 'no-spinner' : ''}`}
           />
         )
     }

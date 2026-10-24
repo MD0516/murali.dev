@@ -43,7 +43,6 @@ const Projects = () => {
           </h2>
           <div className="font-mono text-xs text-text-muted flex items-center gap-4">
             <p>(03 projects)</p>
-            {isAdmin && <ProjectFormModal />}
           </div>
         </motion.div>
       </motion.div>
@@ -65,11 +64,16 @@ const Projects = () => {
               transition={{ delay: 0.1 * i, duration: 0.5 }}
             >
               <ProjectDetailsModal
-                Trigger={<ProjectCard project={project} />}
+                Trigger={<ProjectCard project={project} type={isAdmin ? "admin" : "default"} />}
                 project={project}
               />
             </motion.div>
           ))}
+          {isAdmin && (
+            <ProjectFormModal>
+              <ProjectCard type='add' />
+            </ProjectFormModal>
+          )}
         </div>
       </motion.div>
     </section>

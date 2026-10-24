@@ -4,7 +4,7 @@ export const reorderSchema = z.object({
     order: z
         .array(
             z.object({
-                id: z.string().min(1, "ID is required"),
+                _id: z.string().min(1, "ID is required"),
                 order: z.number().int(),
             })
         )

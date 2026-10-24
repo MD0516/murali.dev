@@ -59,7 +59,7 @@ export const GmailIcon = forwardRef<SVGSVGElement, IconProps>(
 GmailIcon.displayName = "GmailIcon";
 
 export const LogoIcon = forwardRef<SVGSVGElement, IconProps>(
-  ({ size = 24, className = "", ...props }, ref) => (
+  ({ size = 24, className = "", ...props }) => (
     <svg
       width={size}
       height={size}

@@ -124,7 +124,7 @@ export const timeline = {
 export const upload = {
     image: async (
         file: File
-    ): Promise<ApiResponse<string>> => {
+    ): Promise<ApiResponse<{ url: string }>> => {
         const formData = new FormData();
 
         formData.append("file", file);

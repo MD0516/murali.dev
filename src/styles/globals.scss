@@ -56,3 +56,14 @@ textarea:-webkit-autofill:focus {
     background-color: transparent !important;
     transition: background-color 5000s ease-in-out 0s;
 }
+
+.no-spinner::-webkit-outer-spin-button,
+.no-spinner::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.no-spinner {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
