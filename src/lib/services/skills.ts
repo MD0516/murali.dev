@@ -74,9 +74,9 @@ export const reorderSkills = async (
     await requireAdmin();
 
     await Skill.bulkWrite(
-        data.order.map(({ id, order: newOrder }) => ({
+        data.order.map(({ _id, order: newOrder }) => ({
             updateOne: {
-                filter: { _id: id, isDeleted: null },
+                filter: { _id, isDeleted: null },
                 update: { order: newOrder },
             },
         }))
