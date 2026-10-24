@@ -82,7 +82,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       </head>
       <body className="min-h-full flex flex-col">
         <Provider>
-          <Toaster position="top-right" closeButton />
+          <Toaster position="top-right" richColors closeButton />
           {children}
         </Provider>
       </body>

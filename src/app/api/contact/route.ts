@@ -6,7 +6,9 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const POST = withErrorHandler(async (req: NextRequest) => {
     const body = await req.json();
+    console.log(body)
     const payload = validateBody(contactSchema, body);
+    console.log(payload)
 
     await sendMessage(payload);
 

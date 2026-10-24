@@ -4,6 +4,9 @@ import { GithubIcon, GmailIcon, LinkedinIcon } from '../ui/Icons'
 import { useEffect, useRef, useState } from 'react'
 import { ArrowRight } from 'lucide-react'
 import { useContactMutation } from '@/api/queries/contact'
+import { type ContactPayload as ContactFormValues, contactSchema } from '@/lib/validators/contact'
+import { toast } from 'sonner'
+import { Field, Form, Formik, FormikHelpers } from 'formik'
 
 const Contact = () => {
   const { mutate: contactMutate } = useContactMutation();
@@ -12,37 +15,41 @@ const Contact = () => {
 
   const [typedCommand, setTypedCommand] = useState("")
   const [showOutput, setShowOutput] = useState(false)
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    message: ''
-  })
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+  const initialValues: ContactFormValues = {
+    name: "",
+    email: "",
+    message: "",
+  }
+
+  const handleSubmit = (
+    values: ContactFormValues,
+    { resetForm }: FormikHelpers<ContactFormValues>,
+  ) => {
+
+    const result = contactSchema.safeParse(values)
+    if (!result.success) {
+      for (const issue of result.error.issues) {
+        toast.error(issue.message, { id: issue.message })
+      }
+      return
+    }
     contactMutate(
       {
         data: {
-          email: formData.email,
-          message: formData.message,
-          name: formData.name,
+          email: values.email,
+          message: values.message,
+          name: values.name,
         },
       },
       {
         onSuccess: (response) => {
           if (response.success) {
-            setFormData({ name: '', email: '', message: '' })
+            resetForm()
           }
         },
       }
     )
-  }
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    })
   }
 
   // Start typing only when component is in view
@@ -213,65 +220,71 @@ const Contact = () => {
 
               {/* Form - AnimatePresence */}
               <AnimatePresence mode="wait">
-                {showOutput && (
-                  <motion.form
-                    onSubmit={handleSubmit}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.5 }}
-                    className='w-full mt-5'
-                  >
-                    <div className='w-full flex flex-col md:flex-row md:items-end gap-1 md:gap-3 mb-7'>
-                      <label htmlFor="name" className='cursor-pointer text-code-accent text-md'>
-                        [Name]
-                      </label>
-                      <input
-                        type="text"
-                        name="name"
-                        id="name"
-                        placeholder='your name'
-                        value={formData.name}
-                        onChange={handleChange}
-                        className='w-full border-b border-text-muted/30 border-dashed outline-0 focus:border-solid cursor-text ps-2 '
-                      />
-                    </div>
-                    <div className='w-full flex flex-col md:flex-row md:items-end gap-1 md:gap-3 mb-7'>
-                      <label htmlFor="email" className='cursor-pointer text-code-accent text-md'>
-                        [Email]
-                      </label>
-                      <input
-                        type="email"
-                        name="email"
-                        id="email"
-                        placeholder='you@example.com'
-                        value={formData.email}
-                        onChange={handleChange}
-                        className='w-full border-b border-text-muted/30 border-dashed outline-0 focus:border-solid cursor-text ps-2 '
-                      />
-                    </div>
-                    <div className='w-full flex flex-col gap-1 md:gap-3 mb-7'>
-                      <label htmlFor="message" className='cursor-pointer text-code-accent text-md'>
-                        [Message]
-                      </label>
-                      <textarea
-                        name="message"
-                        id="message"
-                        placeholder='your message'
-                        value={formData.message}
-                        onChange={handleChange}
-                        rows={3}
-                        className='w-full border-b border-text-muted/30 border-dashed outline-0 focus:border-solid cursor-text ps-2 '
-                      />
-                    </div>
-                    <button type="submit" className='group flex gap-2 items-center text-code-accent cursor-pointer active:scale-99 active:text-primary transition-all duration-100'>
-                      <span>
-                        $ Send Message
-                      </span>
-                      <ArrowRight size={13} className="transition-transform duration-200 group-hover:translate-x-1" />
-                    </button>
-                  </motion.form>
-                )}
+                <Formik
+                  initialValues={initialValues}
+                  onSubmit={handleSubmit}
+                  validateOnMount={false}
+                  validateOnChange
+                  validateOnBlur
+                >
+                  {showOutput && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      <Form
+                        noValidate
+                        className='w-full mt-5'
+                      >
+                        <div className='w-full flex flex-col md:flex-row md:items-end gap-1 md:gap-3 mb-7'>
+                          <label htmlFor="name" className='cursor-pointer text-code-accent text-md'>
+                            [Name]
+                          </label>
+                          <Field
+                            type="text"
+                            name="name"
+                            id="name"
+                            placeholder='your name'
+                            className='w-full border-b border-text-muted/30 border-dashed outline-0 focus:border-solid cursor-text ps-2 '
+                          />
+                        </div>
+                        <div className='w-full flex flex-col md:flex-row md:items-end gap-1 md:gap-3 mb-7'>
+                          <label htmlFor="email" className='cursor-pointer text-code-accent text-md'>
+                            [Email]
+                          </label>
+                          <Field
+                            type="email"
+                            name="email"
+                            id="email"
+                            placeholder='you@example.com'
+                            className='w-full border-b border-text-muted/30 border-dashed outline-0 focus:border-solid cursor-text ps-2 '
+                          />
+                        </div>
+                        <div className='w-full flex flex-col gap-1 md:gap-3 mb-7'>
+                          <label htmlFor="message" className='cursor-pointer text-code-accent text-md'>
+                            [Message]
+                          </label>
+                          <Field
+                            as="textarea"
+                            name="message"
+                            id="message"
+                            placeholder='your message'
+                            rows={3}
+                            className='w-full border-b border-text-muted/30 border-dashed outline-0 focus:border-solid cursor-text ps-2 '
+                          />
+                        </div>
+                        <button type="submit" className='group flex gap-2 items-center text-code-accent cursor-pointer active:scale-99 active:text-primary transition-all duration-100'>
+                          <span>
+                            $ Send Message
+                          </span>
+                          <ArrowRight size={13} className="transition-transform duration-200 group-hover:translate-x-1" />
+                        </button>
+                      </Form>
+                    </motion.div>
+                  )}
+                </Formik>
               </AnimatePresence>
             </div>
           </motion.div>
