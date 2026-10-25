@@ -272,6 +272,78 @@ $button-sizes: (
     }
 }
 
+.btn-icon-danger {
+    padding: 0.5rem;
+    border-radius: var(--radius-md);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    background-color: var(--surface);
+    color: var(--text-muted);
+
+    &:hover:not(:disabled) {
+        // Swap accent for danger
+        background-color: color-mix(in srgb, var(--danger) 10%, transparent);
+        color: var(--danger);
+        border-color: color-mix(in srgb, var(--danger) 60%, transparent);
+    }
+
+    &:active:not(:disabled) {
+        transform: scale(0.95);
+    }
+
+    &:focus-visible:not(:disabled) {
+        // Use a danger-tinted ring, or just use the default ring if you prefer
+        outline: 2px solid color-mix(in srgb, var(--danger) 50%, transparent);
+        outline-offset: 2px;
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+}
+
+.btn-icon-text {
+    padding: 0.5rem 0.875rem;
+    border-radius: var(--radius-md);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    background-color: var(--surface);
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    font-weight: 500;
+
+    &:hover:not(:disabled) {
+        background-color: color-mix(in srgb, var(--code-accent) 10%, transparent);
+        color: var(--text-primary);
+        border-color: color-mix(in srgb, var(--code-accent) 60%, transparent);
+    }
+
+    &:active:not(:disabled) {
+        transform: scale(0.95);
+    }
+
+    &:focus-visible:not(:disabled) {
+        outline: 2px solid var(--ring);
+        outline-offset: 2px;
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+}
+
 /* ============================================
    TEXT BUTTON
    ============================================ */

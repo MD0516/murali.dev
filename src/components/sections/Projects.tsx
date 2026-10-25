@@ -2,13 +2,55 @@
 import { motion } from 'framer-motion'
 import ProjectCard from '../projects/ProjectCard';
 import ProjectDetailsModal from '../projects/ProjectDetailsModal';
-import { useProjectsQuery } from '@/api/queries/projects';
+import { useProjectsQuery, useReorderProjectsMutation } from '@/api/queries/projects';
 import ProjectFormModal from '../admin/ProjectFormModal';
 import { useAppContext } from '@/context/context';
+import { useEffect, useState } from 'react';
+import { closestCenter, DndContext, DragEndEvent, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { arrayMove, rectSortingStrategy, SortableContext, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 
 const Projects = () => {
   const { data: projects, isLoading } = useProjectsQuery();
+  const { mutate: reorder } = useReorderProjectsMutation();
   const { isAdmin } = useAppContext()
+
+  const [localProjects, setLocalProjects] = useState(projects || [])
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (projects) setLocalProjects(projects)
+  }, [projects])
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 5 },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  )
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+
+    if (!over || active.id === over.id) return
+
+    const oldIndex = localProjects.findIndex((p) => p._id === active.id)
+    const newIndex = localProjects.findIndex((p) => p._id === over.id)
+
+    const reordered = arrayMove(localProjects, oldIndex, newIndex)
+    setLocalProjects(reordered)
+
+    reorder({
+      data: {
+        order: reordered.map((project, index) => ({
+          _id: project._id,
+          order: index + 1,
+        })),
+      }
+    })
+  }
+
   if (isLoading) {
     return null;
   }
@@ -54,27 +96,38 @@ const Projects = () => {
         transition={{ delay: 0.4, duration: 0.8 }}
         className='max-w-6xl'
       >
-        <div className='w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'>
-          {projects?.map((project, i) => (
-            <motion.div
-              key={project._id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ delay: 0.1 * i, duration: 0.5 }}
-            >
-              <ProjectDetailsModal
-                Trigger={<ProjectCard project={project} type={isAdmin ? "admin" : "default"} />}
-                project={project}
-              />
-            </motion.div>
-          ))}
-          {isAdmin && (
-            <ProjectFormModal>
-              <ProjectCard type='add' />
-            </ProjectFormModal>
-          )}
-        </div>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={localProjects.map(p => p._id)}
+            strategy={rectSortingStrategy}
+          >
+            <div className='w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'>
+              {localProjects?.map((project, i) => (
+                <motion.div
+                  key={project._id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-50px" }}
+                  transition={{ delay: 0.1 * i, duration: 0.5 }}
+                >
+                  <ProjectDetailsModal
+                    Trigger={<ProjectCard project={project} type={isAdmin ? "admin" : "default"} />}
+                    project={project}
+                  />
+                </motion.div>
+              ))}
+              {isAdmin && (
+                <ProjectFormModal>
+                  <ProjectCard type='add' />
+                </ProjectFormModal>
+              )}
+            </div>
+          </SortableContext>
+        </DndContext>
       </motion.div>
     </section>
   )

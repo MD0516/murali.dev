@@ -1,8 +1,9 @@
 import { Project } from '@/types'
-import React from 'react'
 import { motion } from 'framer-motion'
 import { ArrowUpRight, Pencil, Plus } from 'lucide-react'
 import ProjectFormModal from '../admin/ProjectFormModal'
+import { useSortable } from "@dnd-kit/sortable"
+import { CSS } from '@dnd-kit/utilities'
 
 type Prop = {
   project?: Project
@@ -11,6 +12,19 @@ type Prop = {
 }
 
 const ProjectCard = ({ project, type = 'default', onClick }: Prop) => {
+
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: project?._id || 'add-project',
+    disabled: type != "admin",
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 50 : 'auto',
+    opacity: isDragging ? 0.5 : 1,
+  }
+
   // 1. Handle "Add Project" state
   if (type === 'add') {
     return (
@@ -35,9 +49,12 @@ const ProjectCard = ({ project, type = 'default', onClick }: Prop) => {
   // 2. Base card content (shared between default and admin)
   const cardContent = (
     <motion.div
-      className={`group bg-surface rounded-lg border border-border hover:border-code-accent/30 p-6 hover:bg-secondary/50 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden ${type === 'default' ? 'cursor-pointer' : ''
-        }`}
-      draggable={true}
+      ref={setNodeRef}
+      style={style}
+      {...listeners}
+      {...attributes}
+      className={`group bg-surface rounded-lg border border-border hover:border-code-accent/30 p-6 hover:bg-secondary/50 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden 
+        ${type === 'default' ? 'cursor-pointer' : 'cursor-pointer active:cursor-grabbing'}`}
     >
       <div className="flex justify-between items-start mb-6">
         <motion.p
@@ -58,11 +75,14 @@ const ProjectCard = ({ project, type = 'default', onClick }: Prop) => {
           />
         )}
         {type === 'admin' && (
-          <div onClick={e => e.stopPropagation()}>
+          <div
+            onPointerDown={e => e.stopPropagation}
+            onClick={e => e.stopPropagation()}
+            className="btn btn-icon text-text-muted opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:text-code-accent"
+          >
             <ProjectFormModal project={project}>
               <Pencil
                 size={16}
-                className="text-text-muted opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:text-code-accent"
               />
             </ProjectFormModal>
           </div>

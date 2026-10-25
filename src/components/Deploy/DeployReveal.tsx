@@ -15,8 +15,8 @@ const DeployReveal = ({
 }: Props) => {
     const [stage, setStage] = useState<"404" | "deploying" | "deployed">("404")
 
-    if (stage === "404") return <FourOhFour onDeploy={() => setStage("deploying")} />
-    if (stage === "deploying") return <DeployLoader onComplete={() => setStage("deployed")} />
+    // if (stage === "404") return <FourOhFour onDeploy={() => setStage("deploying")} />
+    // if (stage === "deploying") return <DeployLoader onComplete={() => setStage("deployed")} />
     return <div className={`${className}`}>{children}</div>
 }
 

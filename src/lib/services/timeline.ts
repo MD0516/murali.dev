@@ -14,7 +14,7 @@ export const getTimelines = async (): Promise<ITimeline[]> => {
 
     const timelineEntries = await Timeline.find({
         isDeleted: null,
-    });
+    }).sort({ order: 1 });
 
     return timelineEntries;
 };

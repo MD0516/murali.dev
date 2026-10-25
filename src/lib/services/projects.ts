@@ -12,7 +12,7 @@ import {
 export const getProjects = async (): Promise<IProject[]> => {
     await connectDB();
 
-    const projects = await Project.find({ isDeleted: null });
+    const projects = await Project.find({ isDeleted: null }).sort({ order: 1 });
 
     return projects;
 };
@@ -23,7 +23,7 @@ export const createProject = async (
     await connectDB();
     await requireAdmin();
 
-    const projectCount = (await Project.find()).length;
+    const projectCount = (await Project.find({ isDeleted: null })).length;
 
     const payload = {
         ...data,

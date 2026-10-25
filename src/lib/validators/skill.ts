@@ -3,7 +3,6 @@ import { z } from "zod";
 export const createSkillSchema = z.object({
   category: z.string().min(1, "Category is required"),
   skills: z.array(z.string().min(1, "Skill cannot be empty")).min(1, "At least one skill is required"),
-  order: z.number().default(0),
 });
 
 export const updateSkillSchema = createSkillSchema.partial();

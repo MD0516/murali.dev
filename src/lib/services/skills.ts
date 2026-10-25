@@ -12,7 +12,7 @@ import connectDB, { UPDATE_OPTIONS } from "../db";
 export const getSkills = async (): Promise<ISkill[]> => {
     await connectDB();
 
-    const skills = await Skill.find({ isDeleted: null });
+    const skills = await Skill.find({ isDeleted: null }).sort({ order: 1 });
 
     return skills;
 };
@@ -23,7 +23,14 @@ export const createSkill = async (
     await connectDB();
     await requireAdmin();
 
-    const skill = await Skill.create(data);
+    const skillCount = (await Skill.find({ isDeleted: null })).length;
+
+    const payload = {
+        ...data,
+        order: skillCount + 1
+    }
+
+    const skill = await Skill.create(payload);
 
     return skill;
 };

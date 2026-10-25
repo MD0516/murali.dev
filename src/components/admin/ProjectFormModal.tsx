@@ -3,7 +3,7 @@
 import { Project } from '@/types'
 import { Loader2, X } from 'lucide-react'
 import { Dialog } from 'radix-ui'
-import React, { useState } from 'react'
+import React, { ReactNode, useState } from 'react'
 import { Formik, Form, type FormikHelpers } from 'formik'
 import FormField from '../ui/FormField'
 import DropZone, { type AcceptedFile } from '../ui/DropZone'
@@ -29,7 +29,7 @@ type FormValues = z.infer<typeof projectFormSchema>
 
 type Props = {
   project?: Project
-  children?: React.ReactNode
+  children?: ReactNode
 }
 
 const ProjectFormModal = ({ project, children }: Props) => {
