@@ -90,8 +90,10 @@ const Category = ({
   )
 }
 
+const EMPTY_SKILLS: Skill[] = [];
+
 const Skills = () => {
-  const { data: skills = [] } = useSkillsQuery();
+  const { data: skills = EMPTY_SKILLS } = useSkillsQuery();
   const { mutate: reorder } = useReorderSkillsMutation()
   const { isAdmin } = useAppContext()
   const [activeGroup, setActiveGroup] = useState("")
@@ -101,7 +103,7 @@ const Skills = () => {
   const sectionRef = useRef<HTMLElement>(null)
   const isInView = useInView(sectionRef, { once: false, margin: "-100px" })
 
-  const [localSkills, setLocalSkills] = useState(skills || [])
+  const [localSkills, setLocalSkills] = useState<Skill[]>(skills)
 
   const groupNames = useMemo(() =>
     skills.map(skill => skill.category),

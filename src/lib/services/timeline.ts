@@ -6,16 +6,12 @@ import {
     CreateTimelinePayload,
     UpdateTimelinePayload,
 } from "../validators/timeline";
-import { ReorderPayload } from "../validators/common";
 import connectDB, { UPDATE_OPTIONS } from "../db";
 
 export const getTimelines = async (): Promise<ITimeline[]> => {
     await connectDB();
 
-    const timelineEntries = await Timeline.find({
-        isDeleted: null,
-    }).sort({ order: 1 });
-
+    const timelineEntries = await Timeline.find({ isDeleted: null }).sort({ startDate: 1 }).lean();
     return timelineEntries;
 };
 
@@ -65,24 +61,6 @@ export const deleteTimeLine = async (id: string): Promise<boolean> => {
     if (!timeline) {
         throw new NotFoundError("Timeline not found");
     }
-
-    return true;
-};
-
-export const reorderTimelines = async (
-    data: ReorderPayload
-): Promise<boolean> => {
-    await connectDB();
-    await requireAdmin();
-
-    await Timeline.bulkWrite(
-        data.order.map(({ _id, order: newOrder }) => ({
-            updateOne: {
-                filter: { _id, isDeleted: null },
-                update: { order: newOrder },
-            },
-        }))
-    );
 
     return true;
 };

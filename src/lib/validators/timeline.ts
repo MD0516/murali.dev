@@ -6,8 +6,11 @@ export const createTimelineSchema = z.object({
     description: z.string().optional(),
     type: z.enum(["edu", "work"]),
     status: z.enum(["completed", "ongoing", "current"]),
-    startDate: z.string().min(1, "Start date is required"),
-    endDate: z.string().optional(),
+    startDate: z.iso.date("Start date is required"),
+    endDate: z.union([
+        z.iso.date(),
+        z.literal(""),
+    ]).optional(),
 });
 
 export const updateTimelineSchema = createTimelineSchema.partial();

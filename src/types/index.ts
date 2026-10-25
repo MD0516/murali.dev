@@ -36,8 +36,8 @@ export interface Timeline {
     description?: string;
     type: TimelineType;
     status: TimelineStatus;
-    startDate: string;
-    endDate?: string;
+    startDate: Date;
+    endDate?: Date;
     isDeleted: Date | null;
     createdAt: string;
     updatedAt: string;

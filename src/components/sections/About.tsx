@@ -3,7 +3,11 @@ import { useAboutQuery } from '@/api/queries/about';
 import { useTimelineQuery } from '@/api/queries/timeline';
 import { motion } from 'framer-motion'
 import { SkeletonTag, SkeletonText, SkeletonTimelineItem } from '../ui/Skeleton';
-import { FolderGit2 } from 'lucide-react';
+import { FolderGit2, NotepadText } from 'lucide-react';
+import { useAppContext } from '@/context/context';
+import AboutEditModal from '../admin/AboutEditModal';
+import { Timeline } from '@/types';
+import { useEffect, useState } from 'react';
 
 const EmptyTimeline = () => (
   <motion.div
@@ -29,12 +33,21 @@ const EmptyTimeline = () => (
 )
 
 const About = () => {
+  const { isAdmin } = useAppContext()
   const { data: about, isLoading: aboutLoading } = useAboutQuery();
-  const { data: timeline = [], isLoading: timelineLoading } = useTimelineQuery();
+  const { data: timelines = [], isLoading: timelineLoading } = useTimelineQuery();
 
   const showAboutSkeleton = aboutLoading && !about
-  const showTimelineSkeleton = timelineLoading && timeline.length === 0
-  const timelineEmpty = !timelineLoading && timeline.length === 0
+  const showTimelineSkeleton = timelineLoading && timelines.length === 0
+  const timelinesEmpty = !timelineLoading && timelines.length === 0
+
+  const formatDate = (date: Date | string): string => {
+    return new Date(date).toLocaleDateString("en-US", {
+      month: "short",
+      year: "numeric",
+      timeZone: "UTC",
+    });
+  };
 
   return (
     <section id='about' className='w-full pb-20 pt-15'>
@@ -43,29 +56,45 @@ const About = () => {
         whileInView={{ opacity: 1, x: 0 }}
         viewport={{ once: true, margin: "-100px" }}
         transition={{ duration: 0.6, ease: "easeOut" }}
-        className="w-full"
+        className="w-full flex justify-between items-center"
       >
-        <motion.p
-          initial={{ opacity: 0, y: -10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ delay: 0.2, duration: 0.5 }}
-          className="font-mono text-xs uppercase text-code-accent tracking-[0.2em] mb-2"
-        >
-          04 / about
-        </motion.p>
+        <div>
+          <motion.p
+            initial={{ opacity: 0, y: -10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+            className="font-mono text-xs uppercase text-code-accent tracking-[0.2em] mb-2"
+          >
+            04 / about
+          </motion.p>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ delay: 0.3, duration: 0.6 }}
-          className='flex justify-between items-center mb-10'
-        >
-          <h2 className='text-3xl font-medium tracking-[0.04em] text-foreground'>
-            A little context
-          </h2>
-        </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ delay: 0.3, duration: 0.6 }}
+            className='flex justify-between items-center mb-10'
+          >
+            <h2 className='text-3xl font-medium tracking-[0.04em] text-foreground'>
+              A little context
+            </h2>
+          </motion.div>
+        </div>
+        {isAdmin &&
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ delay: 0.3, duration: 0.6 }}
+          >
+            <AboutEditModal about={about} timelines={timelines}>
+              <div className='btn btn-icon'>
+                <NotepadText />
+              </div>
+            </AboutEditModal>
+          </motion.div>
+        }
       </motion.div>
 
       <motion.div
@@ -137,10 +166,10 @@ const About = () => {
               <SkeletonTimelineItem delay={0.3} />
               <SkeletonTimelineItem delay={0.4} />
             </>
-          ) : timelineEmpty ? (
+          ) : timelinesEmpty ? (
             <EmptyTimeline />
           ) : (
-            timeline.map((item, index) => (
+            timelines.map((item, index) => (
               <motion.article
                 key={item._id}
                 initial={{ opacity: 0, x: -20 }}
@@ -179,7 +208,7 @@ const About = () => {
                   </div>
                   <div className="flex flex-wrap items-center justify-end gap-2 text-[10px] uppercase tracking-[0.16em]">
                     <span className="text-text-muted">
-                      {item.startDate} — {item.endDate ? item.endDate : "Present"}
+                      {formatDate(item.startDate)} — {item.endDate ? formatDate(item.endDate) : "Present"}
                     </span>
                     <span
                       className={

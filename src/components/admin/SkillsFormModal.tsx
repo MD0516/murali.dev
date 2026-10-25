@@ -57,7 +57,7 @@ const SkillRow = ({ row, handleChange, deleteRow, exists }: SkillRowProps) => {
 
   const handleDelete = (id: string) => {
     deleteRow(id)
-    deleteSkill({ id })
+    if(exists) deleteSkill({ id })
   }
 
   const SubmitText = exists ? "Update" : "Add";
@@ -94,7 +94,7 @@ const SkillRow = ({ row, handleChange, deleteRow, exists }: SkillRowProps) => {
           }
         </button>
         <button
-          className='btn btn-accent btn-md'
+          className='btn btn-modal-save rounded-sm!'
           onClick={handleSubmit}
           disabled={isLoading}
         >

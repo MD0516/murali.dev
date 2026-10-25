@@ -108,27 +108,3 @@ export const useDeleteTimelineMutation = () => {
         },
     });
 };
-
-export const useReorderTimelineMutation = () => {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: async ({
-            data,
-        }: {
-            data: ReorderPayload;
-        }) => timeline.reorder(data),
-
-        onSuccess: (response) => {
-            toast.success(response.message);
-
-            queryClient.invalidateQueries({
-                queryKey: queryKeys.timeline,
-            });
-        },
-
-        onError: (error) => {
-            toast.error(error.message);
-        },
-    });
-};

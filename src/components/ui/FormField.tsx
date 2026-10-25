@@ -1,3 +1,4 @@
+import { Calendar1 } from 'lucide-react'
 import React, { useId } from 'react'
 
 type Option = {
@@ -53,12 +54,21 @@ type RadioFieldProps = BaseProps & {
   options: Option[]
 }
 
+type DateFieldProps = BaseProps & {
+  type: 'date'
+  value: string                 // 'YYYY-MM-DD', or '' when empty
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+  min?: string                  // 'YYYY-MM-DD'
+  max?: string
+}
+
 export type FormFieldProps =
   | InputFieldProps
   | TextareaFieldProps
   | SelectFieldProps
   | CheckboxFieldProps
   | RadioFieldProps
+  | DateFieldProps
 
 /* ---------------------------------------------
    Shared class strings (keep styling consistent)
@@ -147,6 +157,53 @@ const FormField = (props: FormFieldProps) => {
             >
               <path d="M6 8l4 4 4-4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
+          </div>
+        )
+
+      case 'date':
+        return (
+          <div className="relative group">
+            <input
+              id={id}
+              type="date"
+              name={name}
+              value={props.value}
+              onChange={props.onChange}
+              min={props.min}
+              max={props.max}
+              required={required}
+              disabled={disabled}
+              aria-invalid={hasError || undefined}
+              aria-describedby={describedBy}
+              onClick={(e) => {
+                try {
+                  e.currentTarget.showPicker?.()
+                } catch {
+                  /* Fallback for browsers that block showPicker */
+                }
+              }}
+              className={`
+                ${baseControl} 
+                ${controlBorder(hasError)} 
+                cursor-pointer pr-10 
+                [&::-webkit-calendar-picker-indicator]:opacity-0 
+                [&::-webkit-calendar-picker-indicator]:absolute 
+                [&::-webkit-calendar-picker-indicator]:right-0 
+                [&::-webkit-calendar-picker-indicator]:w-full 
+                [&::-webkit-calendar-picker-indicator]:h-full 
+                [&::-webkit-calendar-picker-indicator]:cursor-pointer
+                ${!props.value ? 'text-text-muted' : ''}
+              `}
+            />
+            <Calendar1
+              size={16}
+              className={`pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 transition-colors duration-200 ${disabled
+                ? 'text-text-muted/50'
+                : hasError
+                  ? 'text-danger'
+                  : 'text-text-muted group-hover:text-accent'
+                }`}
+            />
           </div>
         )
 
