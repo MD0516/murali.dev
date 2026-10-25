@@ -102,7 +102,7 @@ const seedProjects = async () => {
     console.log("Projects seeded");
 };
 
-const run = async () => {
+export const run = async () => {
     await connectDB();
 
     await seedAdmin();
