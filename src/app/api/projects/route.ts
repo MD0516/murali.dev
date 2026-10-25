@@ -1,7 +1,7 @@
 import { withErrorHandler } from "@/lib/asyncHandler";
-import { createProject, getProjects, updateProject } from "@/lib/services/projects";
+import { createProject, getProjects } from "@/lib/services/projects";
 import { validateBody } from "@/lib/validate";
-import { createProjectSchema, updateProjectSchema } from "@/lib/validators/project";
+import { createProjectSchema } from "@/lib/validators/project";
 import { NextRequest, NextResponse } from "next/server";
 
 export const GET = withErrorHandler(async () => {

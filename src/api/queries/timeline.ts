@@ -6,8 +6,6 @@ import {
     UpdateTimelinePayload,
 } from "@/lib/validators/timeline";
 
-import { ReorderPayload } from "@/lib/validators/common";
-
 import { timeline } from "../endpoints";
 import { queryKeys } from "./queryKeys";
 

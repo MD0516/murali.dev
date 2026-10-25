@@ -1,7 +1,7 @@
 "use client"
 import { useReorderSkillsMutation, useSkillsQuery } from '@/api/queries/skills'
 import { motion, AnimatePresence, useInView, Variants } from 'framer-motion'
-import { Folder, ListPlus, PencilIcon, Plus } from 'lucide-react';
+import { Folder, ListPlus } from 'lucide-react';
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import SkillsFormModal from '../admin/SkillsFormModal';
 import { useAppContext } from '@/context/context';

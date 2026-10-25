@@ -6,8 +6,6 @@ import { SkeletonTag, SkeletonText, SkeletonTimelineItem } from '../ui/Skeleton'
 import { FolderGit2, NotepadText } from 'lucide-react';
 import { useAppContext } from '@/context/context';
 import AboutEditModal from '../admin/AboutEditModal';
-import { Timeline } from '@/types';
-import { useEffect, useState } from 'react';
 
 const EmptyTimeline = () => (
   <motion.div
