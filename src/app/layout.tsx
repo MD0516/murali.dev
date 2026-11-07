@@ -4,6 +4,7 @@ import "../styles/theme.css";
 import "../styles/globals.scss";
 import Provider from "./provider";
 import { Toaster } from "sonner";
+import Script from "next/script";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://murali.dev"),
@@ -74,11 +75,19 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       className={`${inter.variable} ${jetbrainsMono.variable} h-full antialiased`}
-
+      suppressContentEditableWarning
     >
       <head>
-        <link id="app-favicon" rel="icon" href="/favicon-dark.svg" />
-        <link rel="alternate icon" href="/favicon-dark.ico" />
+        <link id="app-favicon" rel="icon" href="/favicon-dark.ico" suppressContentEditableWarning />
+        <Script id="theme-sync" strategy="beforeInteractive">
+          {`
+            try {
+              if (localStorage.getItem("md_port_theme") === "light") {
+                document.documentElement.classList.add("light");
+              }
+            } catch {}
+          `}
+        </Script>
       </head>
       <body className="min-h-full flex flex-col">
         <Provider>

@@ -3,6 +3,7 @@
 import { createContext, ReactNode, useContext, useEffect, useState } from "react";
 import { useSession } from "@/api/queries/auth";
 
+const THEME_KEY = "md_port_theme";
 type Theme = "light" | "dark";
 
 type AppContextType = {
@@ -19,30 +20,27 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const isAdmin = !!data?.isAdmin;
 
     const [theme, setTheme] = useState<Theme>("dark");
+    const [hydrated, setHydrated] = useState(false);
 
     useEffect(() => {
-        const saved = localStorage.getItem("theme");
-        if (saved === "light" || saved === "dark") {
-            // eslint-disable-next-line react-hooks/set-state-in-effect
-            setTheme(saved);
-        }
+        const saved = localStorage.getItem(THEME_KEY);
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        if (saved === "light" || saved === "dark") setTheme(saved);
+        setHydrated(true);
     }, []);
 
-    // DOM SYNC ONLY — no writes here
+    // DOM sync only, and skip until the saved theme has been loaded
     useEffect(() => {
-        document.documentElement.classList.toggle("light", theme === "light");
+        if (!hydrated) return;
 
-        const link = document.getElementById("app-favicon") as HTMLLinkElement | null;
-        if (link) {
-            link.href = theme === "dark" ? "/favicon-dark.svg" : "/favicon-light.svg";
-        }
-    }, [theme]);
+        document.documentElement.classList.toggle("light", theme === "light");
+    }, [theme, hydrated]);
 
     // WRITE happens here, only when the user actually acts
     const toggleTheme = () => {
         setTheme((prev) => {
             const next = prev === "light" ? "dark" : "light";
-            localStorage.setItem("theme", next);
+            localStorage.setItem(THEME_KEY, next);
             return next;
         });
     };

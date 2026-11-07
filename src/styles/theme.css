@@ -43,6 +43,7 @@
 
   --font-sans: "Manrope", system-ui, -apple-system, sans-serif;
   --font-mono: "DM Mono", "SFMono-Regular", Consolas, monospace;
+  color-scheme: dark;
 }
 
 /* Light Mode */
@@ -88,6 +89,7 @@
 
   --font-sans: "Manrope", system-ui, -apple-system, sans-serif;
   --font-mono: "DM Mono", "SFMono-Regular", Consolas, monospace;
+  color-scheme: light;
 }
 
 :root {
