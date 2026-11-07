@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
-import { readFile } from "fs/promises";
-import { join } from "path/win32";
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 
 export const alt = "Murali Dharan | Full Stack Developer";
 export const size = { width: 1200, height: 630 };
