@@ -3,7 +3,7 @@ import { z } from "zod";
 export const createTimelineSchema = z.object({
     title: z.string().min(1, "Title is required"),
     institution: z.string().min(1, "Institution is required"),
-    description: z.string().optional(),
+    description: z.string().nullable(),
     type: z.enum(["edu", "work"]),
     status: z.enum(["completed", "ongoing", "current"]),
     startDate: z.iso.date("Start date is required"),

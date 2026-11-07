@@ -53,7 +53,7 @@ const TimelineRow = ({
     const data = {
       title: row.title,
       institution: row.institution,
-      description: row.description || undefined,
+      description: row.description || null,
       type: row.type as 'edu' | 'work',
       status: row.status as 'completed' | 'ongoing' | 'current',
       startDate: row.startDate,
@@ -160,7 +160,7 @@ const TimelineRow = ({
           disabled={isLoading}
         >
           <Loader2 className={`mr-2 h-4 w-4 animate-spin ${isLoading ? 'inline-block' : 'hidden'}`} />
-          {isLoading ? "Uploading..." : SubmitText}
+          {isLoading ? "Updating..." : SubmitText}
         </button>
       </div>
     </div>

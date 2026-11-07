@@ -111,9 +111,9 @@ const Contact = () => {
           className='flex justify-between items-center mb-10'
         >
           <h2 className='text-3xl font-medium tracking-[0.04em] text-foreground'>
-            Have a good problem?
+            Let’s ship something.
             <p className='text-sm font-normal text-text-muted mt-2 tracking-normal'>
-              I&apos;d love to hear about
+              An idea, a bug, a project, send it over.
             </p>
           </h2>
           <div className='flex gap-3 items-center'>

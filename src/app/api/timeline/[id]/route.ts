@@ -12,7 +12,7 @@ export const PATCH = withErrorHandler(async (req: NextRequest, { params }) => {
 
     const data = await updateTimeLine(id, payload)
 
-    return NextResponse.json({ message: "Project updated successfully", data }, { status: 200 })
+    return NextResponse.json({ message: "Timeline updated successfully", data }, { status: 200 })
 })
 
 export const DELETE = withErrorHandler(async (req: NextRequest, { params }) => {
