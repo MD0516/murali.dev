@@ -1,18 +1,21 @@
 import { ImageResponse } from "next/og";
+import { readFile } from "fs/promises";
+import { join } from "path/win32";
 
 export const alt = "Murali Dharan | Full Stack Developer";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
+export const runtime = "nodejs";
+
 export default async function Image() {
     const [regularFont, boldFont] = await Promise.all([
-        fetch(
-            new URL("./fonts/JetBrainsMono-Regular.ttf", import.meta.url)
-        ).then((res) => res.arrayBuffer()),
-
-        fetch(
-            new URL("./fonts/JetBrainsMono-Bold.ttf", import.meta.url)
-        ).then((res) => res.arrayBuffer()),
+        readFile(
+            join(process.cwd(), "src/app/fonts/JetBrainsMono-Regular.ttf")
+        ),
+        readFile(
+            join(process.cwd(), "src/app/fonts/JetBrainsMono-Bold.ttf")
+        ),
     ]);
 
     return new ImageResponse(
@@ -64,7 +67,7 @@ export default async function Image() {
                             Full Stack Developer
                         </div>
                         <div style={{ display: "flex", fontSize: 28, color: "#71717a", marginTop: 40 }}>
-                            React · Node.js · Express · MongoDB · Next.js
+                            JavaScript · TypeScript · Node.js · PHP 
                         </div>
                     </div>
                 </div>
