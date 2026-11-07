@@ -8,15 +8,16 @@ export const contentType = "image/png";
 
 export const runtime = "nodejs";
 
+const [regularFont, boldFont] = await Promise.all([
+    readFile(
+        join(process.cwd(), "src/app/fonts/JetBrainsMono-Regular.ttf")
+    ),
+    readFile(
+        join(process.cwd(), "src/app/fonts/JetBrainsMono-Bold.ttf")
+    ),
+]);
+
 export default async function Image() {
-    const [regularFont, boldFont] = await Promise.all([
-        readFile(
-            join(process.cwd(), "src/app/fonts/JetBrainsMono-Regular.ttf")
-        ),
-        readFile(
-            join(process.cwd(), "src/app/fonts/JetBrainsMono-Bold.ttf")
-        ),
-    ]);
 
     return new ImageResponse(
         (
@@ -67,7 +68,41 @@ export default async function Image() {
                             Full Stack Developer
                         </div>
                         <div style={{ display: "flex", fontSize: 28, color: "#71717a", marginTop: 40 }}>
-                            JavaScript · TypeScript · Node.js · PHP 
+                            JavaScript · TypeScript · PHP · Node.js
+                        </div>
+                        <div
+                            style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 20,
+                                marginTop: 44,
+                            }}
+                        >
+                            <div
+                                style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    padding: "16px 24px",
+                                    borderRadius: 10,
+                                    background: "#8b5cf6",
+                                    color: "#ffffff",
+                                    fontSize: 22,
+                                    fontWeight: 700,
+                                }}
+                            >
+                                Explore my work ↗
+                                
+                            </div>
+
+                            <div
+                                style={{
+                                    display: "flex",
+                                    color: "#a1a1aa",
+                                    fontSize: 20,
+                                }}
+                            >
+                                murali-dev.vercel.app
+                            </div>
                         </div>
                     </div>
                 </div>
