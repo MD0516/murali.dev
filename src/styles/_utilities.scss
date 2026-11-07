@@ -47,6 +47,18 @@
     }
 }
 
+.btn-code-accent {
+    background-color: color-mix(in srgb, var(--code-bg) 30%, transparent);
+    color: var(--code-accent);
+    border-color: color-mix(in srgb, var(--code-accent) 60%, transparent);
+
+    &:hover:not(:disabled) {
+        background-color: color-mix(in srgb, var(--code-bg) 30%, transparent);
+        color: var(--code-text);
+        border-color: var(--code-accent);
+    }
+}
+
 /* ============================================
    VARIANT MAPS
    ============================================ */

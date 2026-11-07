@@ -4,29 +4,33 @@ import { toast } from "sonner";
 import { upload } from "../endpoints";
 
 
-export const useUploadImageMutation = () => {
-    const taskId = new Date().getTime().toString() + crypto.randomUUID().toString();
+export const useUploadFileMutation = () => {
     return useMutation({
         mutationFn: async ({
             file,
+            type,
         }: {
             file: File;
+            type: "image" | "resume";
         }) => {
-            const response = await upload.image(file);
-
+            const response = await upload.file(file, type);
             return response.data;
         },
 
-        onMutate() {
-            toast.loading("Uploading image...", { id: taskId });
+        onMutate: ({ type }) => {
+            const toastId = toast.loading(`Uploading ${type}...`);
+            return { toastId };
         },
 
-        onSuccess: () => {
-            toast.success("Image uploaded successfully", { id: taskId });
+        onSuccess: (_data, { type }, context) => {
+            toast.success(
+                `${type === "image" ? "Image" : "Resume"} uploaded successfully`,
+                { id: context?.toastId }
+            );
         },
 
-        onError: (error) => {
-            toast.error(error.message, { id: taskId });
+        onError: (error, _variables, context) => {
+            toast.error(error.message, { id: context?.toastId });
         },
     });
 };

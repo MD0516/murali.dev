@@ -6,6 +6,7 @@ const aboutSchema = new mongoose.Schema(
         location: { type: String, required: true },
         bio: { type: String, required: true },
         tagline: { type: String, required: true },
+        resume: { type: String, required: false },
     },
     { timestamps: true }
 )

@@ -15,6 +15,11 @@ import {
     Pencil,
 } from 'lucide-react'
 import Image from 'next/image'
+import { Document, Page, pdfjs } from 'react-pdf'
+import 'react-pdf/dist/Page/AnnotationLayer.css'
+import 'react-pdf/dist/Page/TextLayer.css'
+
+pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.mjs`
 
 /* ---------------------------------------------
    Types
@@ -43,6 +48,7 @@ type DropZoneProps = {
     /** Existing image URL (e.g. from server). Lower priority than a freshly picked file. */
     imageUrl?: string
     imageAlt?: string
+    resumeUrl?: string
 
     files?: AcceptedFile[]
     onFilesChange?: (files: AcceptedFile[]) => void
@@ -132,6 +138,7 @@ const DropZone = ({
     multiple = true,
     imageUrl,
     imageAlt = 'Uploaded image',
+    resumeUrl,
     files: controlledFiles,
     onFilesChange,
     onError,
@@ -162,17 +169,28 @@ const DropZone = ({
     //   1. newly selected image file (blob preview)
     //   2. existing imageUrl from server
     // --------------------------------------------------------------
-    const selectedImage = files.find(
-        (f) => f.preview && f.file.type.startsWith('image/'),
+    const selectedFile = files.find(
+        (f) => f.preview && f.file.type.startsWith('image/') || f.file.type === 'application/pdf',
     )
-    const previewUrl = selectedImage?.preview ?? imageUrl
-    const previewAlt = selectedImage?.file.name ?? imageAlt
-    const showPreview = Boolean(previewUrl)
+    const previewUrl = selectedFile?.preview ?? imageUrl
+    const previewAlt = selectedFile?.file.name ?? imageAlt
+    const showPreview = Boolean(selectedFile || resumeUrl || imageUrl)
+
+    const isSelectedPdf = selectedFile?.file.type === 'application/pdf'
+    const useResumeUrl = !selectedFile && Boolean(resumeUrl)
+
+    const isPdf = Boolean(isSelectedPdf || useResumeUrl)
+
+    const documentFile = isSelectedPdf
+        ? selectedFile?.file
+        : useResumeUrl
+            ? resumeUrl
+            : undefined
 
     // Files that don't have a renderable image preview (non-images, or images
     // outside `files` we're already displaying). We still want to show them in
     // the file list.
-    const listableFiles = files.filter((f) => f.id !== selectedImage?.id)
+    const listableFiles = files.filter((f) => f.id !== selectedFile?.id)
 
     const reportError = (msg: string) => {
         setInternalError(msg)
@@ -307,21 +325,38 @@ const DropZone = ({
                     isDragging ? 'border-accent ring-2 ring-accent/40' : 'border-border',
                 ].join(' ')}
             >
-                <Image
-                    src={previewUrl!}
-                    alt={previewAlt}
-                    width={800}
-                    height={450}
-                    unoptimized={previewUrl?.startsWith('blob:')}
-                    className="pointer-events-none h-48 w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
-                />
+                {isPdf ? (
+                    <div className="pointer-events-none flex h-48 w-full items-start justify-center overflow-hidden bg-white">
+                        <Document
+                            file={documentFile as string | File}
+                            loading={<div className="text-sm font-mono text-black p-4">Loading PDF...</div>}
+                            error={<div className="text-sm font-mono text-danger p-4">Failed to load PDF.</div>}
+                        >
+                            <Page
+                                pageNumber={1}
+                                width={800}
+                                renderTextLayer={false}
+                                renderAnnotationLayer={false}
+                                className="w-full!" />
+                        </Document>
+                    </div>
+                ) : (
+                    <Image
+                        src={previewUrl!}
+                        alt={previewAlt}
+                        width={800}
+                        height={450}
+                        unoptimized={previewUrl?.startsWith('blob:')}
+                        className="pointer-events-none h-48 w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+                    />
+                )}
 
                 {/* Change overlay */}
                 <button
                     type="button"
                     onClick={openPicker}
                     disabled={disabled}
-                    className="absolute inset-0 flex cursor-pointer items-center justify-center gap-2 bg-black/0 font-mono text-sm font-medium text-transparent backdrop-blur-0 transition-all duration-200 group-hover:bg-black/50 group-hover:text-text-primary group-hover:backdrop-blur-[2px] focus-visible:bg-black/50 focus-visible:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="absolute inset-0 z-10 flex cursor-pointer items-center justify-center gap-2 bg-black/0 font-mono text-sm font-medium text-transparent backdrop-blur-0 transition-all duration-200 group-hover:bg-black/50 group-hover:text-white group-hover:backdrop-blur-[2px] focus-visible:bg-black/50 focus-visible:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                     <Pencil className="h-4 w-4" strokeWidth={2} />
                     <span className="uppercase tracking-wider">Change</span>
@@ -329,7 +364,7 @@ const DropZone = ({
 
                 {/* Drop hint shown only while dragging over the preview */}
                 {isDragging && (
-                    <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-accent/10 backdrop-blur-[1px]">
+                    <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-accent/10 backdrop-blur-[1px]">
                         <span className="rounded-md bg-surface/90 px-3 py-1.5 font-mono text-xs uppercase tracking-wider text-accent">
                             Drop to replace
                         </span>

@@ -36,4 +36,7 @@ const connectDB = async () => {
 
 export default connectDB;
 
-export const UPDATE_OPTIONS = { new: true, runValidators: true } as const;
+export const UPDATE_OPTIONS = {
+    returnDocument: "after",
+    runValidators: true,
+} as const;

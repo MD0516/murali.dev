@@ -2,7 +2,7 @@
 import { About, Timeline } from '@/types';
 import { Loader2, Plus, Trash2Icon, X } from 'lucide-react';
 import { Dialog } from 'radix-ui'
-import React, { ReactNode, useState } from 'react'
+import { ReactNode, useState } from 'react'
 import FormField from '../ui/FormField';
 import { z } from 'zod';
 import { updateAboutSchema } from "@/lib/validators/about"
@@ -10,6 +10,8 @@ import { Form, Formik, FormikHelpers } from 'formik';
 import { useUpdateAboutMutation } from '@/api/queries/about';
 import { toast } from 'sonner';
 import { useCreateTimelineMutation, useDeleteTimelineMutation, useUpdateTimelineMutation } from '@/api/queries/timeline';
+import DropZone, { AcceptedFile } from '../ui/DropZone';
+import { useUploadFileMutation } from '@/api/queries/upload';
 
 type Props = {
   children: ReactNode;
@@ -44,12 +46,12 @@ type TimelineRowProps = {
 const TimelineRow = ({
   row, handleChange, deleteRow, exists
 }: TimelineRowProps) => {
-  const { mutate: createTimeline, isPending: isCreating } = useCreateTimelineMutation()
-  const { mutate: updateTimeline, isPending: isUpdating } = useUpdateTimelineMutation()
-  const { mutate: deleteTimeline, isPending: isDeleting } = useDeleteTimelineMutation()
+  const { mutateAsync: createTimeline, isPending: isCreating } = useCreateTimelineMutation()
+  const { mutateAsync: updateTimeline, isPending: isUpdating } = useUpdateTimelineMutation()
+  const { mutateAsync: deleteTimeline, isPending: isDeleting } = useDeleteTimelineMutation()
   const isLoading = isCreating || isUpdating;
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const data = {
       title: row.title,
       institution: row.institution,
@@ -61,16 +63,16 @@ const TimelineRow = ({
     };
 
     if (exists) {
-      updateTimeline({ id: row.id, data });
+      await updateTimeline({ id: row.id, data });
       return;
     }
 
-    createTimeline({ data });
+    await createTimeline({ data });
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     deleteRow(id)
-    if (exists) deleteTimeline({ id })
+    if (exists) await deleteTimeline({ id })
   }
 
   const SubmitText = exists ? "Update" : "Add"
@@ -173,7 +175,11 @@ const AboutEditModal = ({
   timelines,
 }: Props) => {
   const [open, setOpen] = useState(false)
-  const { mutate: updateAbout, isPending: isUpdating } = useUpdateAboutMutation()
+  const { mutateAsync: updateAbout, isPending: isUpdating } = useUpdateAboutMutation()
+  const { mutateAsync: uploadImage, isPending: isUploading } = useUploadFileMutation()
+  const [resume, setResume] = useState<AcceptedFile[]>([])
+
+  const isLoading = isUpdating || isUploading;
 
   const [timelineRows, setTimelineRows] = useState<TimelineRowType[]>(timelines.map(timeline => ({
     id: timeline._id,
@@ -256,6 +262,7 @@ const AboutEditModal = ({
     location: about?.location || "",
     bio: about?.bio || "",
     tagline: about?.tagline || "",
+    resume: about?.resume || "",
   }
 
   const validate = (values: AboutFormValues) => {
@@ -270,17 +277,25 @@ const AboutEditModal = ({
     return errors
   }
 
-  const handleSubmit = (
+  const handleSubmit = async (
     values: AboutFormValues,
     { resetForm }: FormikHelpers<AboutFormValues>
   ) => {
+    let finalResumeUrl = values?.resume
+
+    if (resume.length > 0) {
+      const { url } = await uploadImage({ file: resume[0].file, type: 'resume' })
+      finalResumeUrl = url;
+    }
+
     try {
-      updateAbout({
+      await updateAbout({
         data: {
           bio: values.bio,
           location: values.location,
           role: values.role,
           tagline: values.tagline,
+          resume: finalResumeUrl,
         }
       })
     } finally {
@@ -293,6 +308,7 @@ const AboutEditModal = ({
 
     if (next) {
       setTimelineRows(createTimelineRows(timelines))
+      setResume([])
     }
   }
 
@@ -360,14 +376,27 @@ const AboutEditModal = ({
                   onChange={handleChange}
                   error={touched.tagline && typeof errors.tagline === 'string' ? errors.tagline : undefined}
                 />
+                <DropZone
+                  name="resume"
+                  label="Upload Resume"
+                  accept='application/pdf,.pdf'
+                  maxFiles={1}
+                  maxSize={5 * 1024 * 1024} // 5MB
+                  multiple={false}
+                  files={resume}
+                  onFilesChange={setResume}
+                  resumeUrl={values.resume ?? undefined}
+                />
                 <div className="flex items-center justify-between gap-2 my-4">
                   <button
                     type="submit"
                     className="btn btn-modal-save"
-                    disabled={isUpdating}
+                    disabled={isLoading}
                   >
-                    <Loader2 className={`mr-2 h-4 w-4 animate-spin ${isUpdating ? 'inline-block' : 'hidden'}`} />
-                    {isUpdating ? "Uploading..." : 'Update'}
+                    <Loader2 className={`mr-2 h-4 w-4 animate-spin ${isLoading ? 'inline-block' : 'hidden'}`} />
+                    {isLoading
+                      ? `${isUploading ? "Uploading..." : "Updating..."}`
+                      : 'Update'}
                   </button>
 
                   <button

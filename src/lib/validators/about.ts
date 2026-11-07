@@ -5,6 +5,7 @@ export const createAboutSchema = z.object({
   location: z.string().min(1, "Location is required"),
   bio: z.string().min(1, "Info is required"),
   tagline: z.string().min(1, "Tagline is required"),
+  resume: z.string().nullable().optional(),
 });
 
 export const updateAboutSchema = createAboutSchema.partial();

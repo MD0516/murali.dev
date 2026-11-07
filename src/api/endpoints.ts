@@ -122,15 +122,16 @@ export const timeline = {
 
 
 export const upload = {
-    image: async (
-        file: File
+    file: async (
+        file: File,
+        type: 'image' | 'resume'
     ): Promise<ApiResponse<{ url: string }>> => {
         const formData = new FormData();
 
         formData.append("file", file);
 
         return await api
-            .post("/upload", formData)
+            .post(`/upload?type=${type}`, formData)
             .then(res => res.data);
     },
 };

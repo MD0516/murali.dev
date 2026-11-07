@@ -1,8 +1,10 @@
 "use client"
-import { ArrowUpRight } from 'lucide-react'
+import { ArrowUpRight, Download } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useAboutQuery } from '@/api/queries/about'
+import { getDownloadUrl } from '@vercel/blob'
 
 const sequence = [
   { type: "command", text: "whoami" },
@@ -27,6 +29,9 @@ const sequence = [
 const Hero = () => {
   const router = useRouter();
   const terminalRef = useRef<HTMLDivElement>(null);
+  const { data: about } = useAboutQuery();
+
+  const resume = about?.resume || null;
 
   const [lines, setLines] = useState<{ type: string; text: string }[]>([]);
   const [currentText, setCurrentText] = useState("");
@@ -119,9 +124,10 @@ const Hero = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.7, duration: 0.6 }}
+          className='inline-flex gap-4'
         >
           <button
-            className='group inline-flex items-center gap-2 rounded-md bg-sidebar-primary px-6 py-3.5 font-mono text-sm tracking-widest text-page transition-all duration-300 hover:bg-accent hover:text-accent-foreground hover:shadow-[0_0_24px_rgba(167,139,250,0.3)] focus:outline-none active:scale-98 cursor-pointer'
+            className='btn btn-primary group cursor-pointer'
             onClick={() => router.push("#projects")}
           >
             View Projects
@@ -130,6 +136,16 @@ const Hero = () => {
               className="transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1"
             />
           </button>
+          {resume && (
+            <a
+              href={getDownloadUrl(resume)}
+              download="Murali-Dharan-Resume.pdf"
+              className="btn btn-code-accent group cursor-pointer"
+            >
+              <Download size={16} />
+              <span>Resume</span>
+            </a>
+          )}
         </motion.div>
       </motion.div>
 

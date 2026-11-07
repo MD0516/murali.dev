@@ -8,7 +8,7 @@ import { Formik, Form, type FormikHelpers } from 'formik'
 import FormField from '../ui/FormField'
 import DropZone, { type AcceptedFile } from '../ui/DropZone'
 import TagInput from '../ui/TagInput'
-import { useUploadImageMutation } from '@/api/queries/upload'
+import { useUploadFileMutation } from '@/api/queries/upload'
 import { useCreateProjectMutation, useUpdateProjectMutation } from '@/api/queries/projects'
 import z from 'zod'
 import { CreateProjectPayload } from '@/lib/validators/project'
@@ -38,7 +38,7 @@ const ProjectFormModal = ({ project, children }: Props) => {
   const [imageFiles, setImageFiles] = useState<AcceptedFile[]>([])
   const [formError, setFormError] = useState<string | null>(null)
 
-  const { mutateAsync: uploadImage, isPending: isUploadingImage } = useUploadImageMutation()
+  const { mutateAsync: uploadImage, isPending: isUploadingImage } = useUploadFileMutation()
   const { mutateAsync: createProject, isPending: isCreatingProject } = useCreateProjectMutation()
   const { mutateAsync: updateProject, isPending: isUpdatingProject } = useUpdateProjectMutation()
 
@@ -78,7 +78,7 @@ const ProjectFormModal = ({ project, children }: Props) => {
 
       // 1. Upload image if a new file was selected
       if (imageFiles.length > 0) {
-        const data = await uploadImage({ file: imageFiles[0].file })
+        const data = await uploadImage({ file: imageFiles[0].file, type: 'image' })
         finalImageUrl = data.url
       }
 

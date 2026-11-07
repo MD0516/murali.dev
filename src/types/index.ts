@@ -49,6 +49,7 @@ export interface About {
     location: string;
     bio: string;
     tagline: string;
+    resume?: string;
     createdAt: string;
     updatedAt: string;
 }
