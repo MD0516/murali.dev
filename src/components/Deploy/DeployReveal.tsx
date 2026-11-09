@@ -3,26 +3,15 @@
 import { ReactNode, useEffect, useState } from "react"
 import FourOhFour from "./FourOhFour"
 import DeployLoader from "./DeployLoader"
-
-const STORAGE_KEY = "deploy-at"
-const COOLDOWN_MS = 1000 * 60 * 60 * 24 // 1 day
+import { useAppContext } from "@/context/context"
+import Loader from "../layouts/Loader"
+import { useSession } from '@/api/queries/auth';
+import { useProjectsQuery } from '@/api/queries/projects';
+import { useSkillsQuery } from '@/api/queries/skills';
+import { useAboutQuery } from '@/api/queries/about';
+import { useTimelineQuery } from '@/api/queries/timeline';
 
 type Stage = "404" | "deploying" | "deployed" | "cooldown"
-
-const recentlyDeployed = () => {
-    try {
-        const at = Number(localStorage.getItem(STORAGE_KEY))
-        return at > 0 && Date.now() - at < COOLDOWN_MS
-    } catch {
-        return false
-    }
-}
-
-const markDeployed = () => {
-    try {
-        localStorage.setItem(STORAGE_KEY, String(Date.now()))
-    } catch { }
-}
 
 type Props = {
     children: ReactNode,
@@ -33,14 +22,27 @@ const DeployReveal = ({
     children,
     className
 }: Props) => {
-    const [stage, setStage] = useState<Stage>("cooldown")
+    useSession()
+    useProjectsQuery()
+    useSkillsQuery()
+    useAboutQuery()
+    useTimelineQuery()
+
+    const { storageKey, recentlyDeployed } = useAppContext()
+    const [stage, setStage] = useState<Stage | null>(null)
+
+    const markDeployed = () => {
+        try {
+            localStorage.setItem(storageKey, String(Date.now()))
+        } catch { }
+    }
 
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setStage(recentlyDeployed() ? "deployed" : "404")
     }, [])
 
-    if (stage === "cooldown") return <div className={`bg-page`} />
+    if (stage === null) return <Loader />
     if (stage === "404") return <FourOhFour onDeploy={() => setStage("deploying")} />
     if (stage === "deploying")
         return (
