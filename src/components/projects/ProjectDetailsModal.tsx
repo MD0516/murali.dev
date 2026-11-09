@@ -1,12 +1,13 @@
 import { Project } from '@/types';
 import { Dialog } from 'radix-ui'
 import { ReactNode } from 'react'
-import { X, ExternalLink, ArrowUpRight, Pencil } from 'lucide-react'
+import { X, ExternalLink, ArrowUpRight, Pencil, Trash2, Loader2 } from 'lucide-react'
 import { GithubIcon } from '../ui/Icons';
 import Carousel from '../ui/Carousel';
 import { useAppContext } from '@/context/context';
 import ProjectFormModal from '../admin/ProjectFormModal';
 import RichText from '../ui/RichText';
+import { useDeleteProjectMutation } from '@/api/queries/projects';
 
 type Props = {
   Trigger: ReactNode;
@@ -18,6 +19,7 @@ const ProjectDetailsModal = ({
   project
 }: Props) => {
   const { isAdmin } = useAppContext()
+  const { mutateAsync: deleteProject, isPending: isDeleting } = useDeleteProjectMutation()
   return (
     <Dialog.Root>
       <Dialog.Trigger asChild>
@@ -101,45 +103,62 @@ const ProjectDetailsModal = ({
             </div>
 
             {/* Links */}
-            <div className="flex gap-3 border-t border-border pt-4">
+            <div className="flex flex-wrap items-center gap-3 border-t border-border pt-4">
               {project.liveUrl && (
                 <a
                   href={project.liveUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group inline-flex items-center gap-2 rounded-md bg-sidebar-primary px-4 py-2.5 font-mono text-xs text-page transition-all duration-300 hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-code-accent cursor-pointer"
+                  className="group inline-flex items-center gap-2 rounded-md bg-sidebar-primary px-3 py-2 sm:px-4 sm:py-2.5 font-mono text-[11px] sm:text-xs text-page transition-all duration-300 hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-code-accent cursor-pointer"
                 >
                   <ExternalLink size={14} />
                   Live Preview
                   <ArrowUpRight size={12} className="transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                 </a>
               )}
+
               {project.githubUrl && (
                 <a
                   href={project.githubUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group inline-flex items-center gap-2 rounded-md border border-border px-4 py-2.5 font-mono text-xs text-foreground transition-all duration-300 hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-code-accent cursor-pointer"
+                  className="group inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 sm:px-4 sm:py-2.5 font-mono text-[11px] sm:text-xs text-foreground transition-all duration-300 hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-code-accent cursor-pointer"
                 >
                   <GithubIcon size={14} />
                   GitHub Repo
                   <ArrowUpRight size={12} className="transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                 </a>
               )}
+
               {isAdmin && (
                 <div
-                  onPointerDown={e => e.stopPropagation}
+                  onPointerDown={e => e.stopPropagation()}
                   onClick={e => e.stopPropagation()}
                 >
                   <ProjectFormModal project={project}>
-                    <div className='group inline-flex items-center gap-2 rounded-md border border-border px-4 py-2.5 font-mono text-xs text-foreground transition-all duration-300 hover:bg-code-accent/40 focus:outline-none focus:ring-2 focus:ring-code-accent cursor-pointer'>
-                      <Pencil
-                        size={16}
-                      />
+                    <div className='group inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 sm:px-4 sm:py-2.5 font-mono text-[11px] sm:text-xs text-foreground transition-all duration-300 hover:bg-code-accent/40 focus:outline-none focus:ring-2 focus:ring-code-accent cursor-pointer'>
+                      <Pencil size={14} className="sm:w-4 sm:h-4" />
                       Edit Project
                     </div>
                   </ProjectFormModal>
                 </div>
+              )}
+
+              {isAdmin && (
+                <button
+                  onPointerDown={e => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    if (window.confirm("Are you sure you want to delete this project? This action cannot be undone.")) {
+                      deleteProject({ id: project._id })
+                    }
+                  }}
+                  disabled={isDeleting}
+                  className='sm:ml-auto group inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 sm:px-4 sm:py-2.5 font-mono text-[11px] sm:text-xs text-foreground transition-all duration-300 hover:bg-danger/10 hover:text-danger hover:border-danger/60 focus:outline-none focus:ring-2 focus:ring-danger cursor-pointer'
+                >
+                  {isDeleting ? <Loader2 className='h-3.5 w-3.5 sm:h-4 sm:w-4 animate-spin' /> : <Trash2 size={14} className="sm:w-4 sm:h-4" />}
+                  {isDeleting ? "Deleting..." : "Delete Project"}
+                </button>
               )}
             </div>
           </div>
