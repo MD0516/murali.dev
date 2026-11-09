@@ -97,7 +97,7 @@ const TimelineRow = ({
         />
       </div>
       <FormField
-        type='text'
+        type='textarea'
         label='Description'
         name='description'
         value={row.description}
