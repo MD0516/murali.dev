@@ -77,7 +77,7 @@ const ProjectFormModal = ({ project, children }: Props) => {
 
   const handleSubmit = async (
     values: FormValues,
-    { setFieldError, resetForm, setFieldTouched }: FormikHelpers<FormValues>
+    { setFieldError, setFieldTouched }: FormikHelpers<FormValues>
   ) => {
     setFormError(null)
 
@@ -173,7 +173,7 @@ const ProjectFormModal = ({ project, children }: Props) => {
             validateOnBlur
             validateOnChange
           >
-            {({ values, errors, touched, handleChange, setFieldValue, setFieldTouched, resetForm, setFieldError }) => (
+            {({ values, errors, touched, handleChange, setFieldValue, setFieldTouched, setFieldError }) => (
               <Form noValidate className="p-4 space-y-4">
                 {formError && (
                   <div className="p-3 text-sm text-danger bg-danger/10 border border-danger/20 rounded-md">
