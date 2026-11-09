@@ -2,6 +2,10 @@
 
 import { createContext, ReactNode, useContext, useEffect, useState } from "react";
 import { useSession } from "@/api/queries/auth";
+import { useProjectsQuery } from '@/api/queries/projects';
+import { useSkillsQuery } from '@/api/queries/skills';
+import { useAboutQuery } from '@/api/queries/about';
+import { useTimelineQuery } from '@/api/queries/timeline';
 
 const THEME_KEY = "md_port_theme";
 type Theme = "light" | "dark";
@@ -17,6 +21,11 @@ const AppContext = createContext<AppContextType | null>(null);
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
     const { data, isLoading: isSessionLoading } = useSession();
+    useProjectsQuery()
+    useSkillsQuery()
+    useAboutQuery()
+    useTimelineQuery()
+    
     const isAdmin = !!data?.isAdmin;
 
     const [theme, setTheme] = useState<Theme>("dark");
