@@ -8,6 +8,7 @@ import {
     CreateProjectPayload,
     UpdateProjectPayload,
 } from "../validators/project";
+import { del } from "@vercel/blob";
 
 export const getProjects = async (): Promise<IProject[]> => {
     await connectDB();
@@ -91,3 +92,35 @@ export const reorderProjects = async (
 
     return true;
 };
+
+export const deleteImage = async (projectId: string, imageUrl: string): Promise<IProject> => {
+    await connectDB();
+    await requireAdmin();
+
+    const project = await Project.findOne({ _id: projectId, isDeleted: null });
+
+    if (!project) {
+        throw new NotFoundError("Project not found");
+    }
+
+    const imageIndex = project.images.findIndex((img: { src: string, alt: string }) => img.src === imageUrl);
+
+    if (imageIndex === -1) {
+        throw new NotFoundError("Image not found in the project");
+    }
+
+    project.images.splice(imageIndex, 1);
+    await project.save();
+
+    try {
+        await del(imageUrl);
+    } catch (error) {
+        console.error("Failed to delete project image from Vercel Blob:", {
+            projectId,
+            imageUrl,
+            error,
+        });
+    }
+
+    return project;
+}

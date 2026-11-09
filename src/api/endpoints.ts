@@ -2,7 +2,7 @@ import { About, AdminUser, Project, Skill, Timeline } from "@/types";
 import { ApiResponse } from "@/types";
 
 import { LoginPayload } from "@/lib/validators/login";
-import { CreateProjectPayload, UpdateProjectPayload } from "@/lib/validators/project";
+import { CreateProjectPayload, DeleteImagePayload, UpdateProjectPayload } from "@/lib/validators/project";
 import { CreateSkillPayload, UpdateSkillPayload } from "@/lib/validators/skill";
 import { UpdateAboutPayload } from "@/lib/validators/about";
 import {
@@ -53,6 +53,12 @@ export const project = {
         data: ReorderPayload
     ): Promise<{ message: string }> =>
         await api.patch("/projects/reorder", data).then(res => res.data),
+
+    deleteImage: async (
+        id: string,
+        data: DeleteImagePayload
+    ): Promise<{ message: string }> =>
+        await api.delete(`/projects/${id}/images`, { data }).then(res => res.data),
 };
 
 
@@ -123,12 +129,14 @@ export const timeline = {
 
 export const upload = {
     file: async (
-        file: File,
+        files: File[],
         type: 'image' | 'resume'
-    ): Promise<ApiResponse<{ url: string }>> => {
+    ): Promise<ApiResponse<{ urls: string[] }>> => {
         const formData = new FormData();
 
-        formData.append("file", file);
+        files.forEach((file) => {
+            formData.append("files", file);
+        });
 
         return await api
             .post(`/upload?type=${type}`, formData)

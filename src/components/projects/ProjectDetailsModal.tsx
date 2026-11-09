@@ -3,6 +3,7 @@ import { Dialog } from 'radix-ui'
 import { ReactNode } from 'react'
 import { X, ExternalLink, ArrowUpRight } from 'lucide-react'
 import { GithubIcon } from '../ui/Icons';
+import Carousel from '../ui/Carousel';
 
 type Props = {
   Trigger: ReactNode;
@@ -43,22 +44,15 @@ const ProjectDetailsModal = ({
           {/* Content */}
           <div className="p-6 overflow-y-auto max-h-[calc(80vh-48px)]">
             {/* Image */}
-            {project.imageUrl && (
+            {project.images && (
               <div className="mb-6 overflow-hidden rounded-lg border border-border">
-                <img
-                  src={project.imageUrl}
-                  alt={project.title}
-                  className="w-full h-48 object-cover hover:scale-105 transition-transform duration-500"
-                />
+                <Carousel images={project.images} type='preview' />
               </div>
             )}
 
             {/* Title & Order */}
             <div className="flex items-start justify-between mb-4">
               <div>
-                <p className="font-mono text-xs text-code-accent mb-2">
-                  {'//'} project_{project.order}
-                </p>
                 <h2 className="text-2xl font-bold text-foreground tracking-tight">
                   {project.title}
                 </h2>

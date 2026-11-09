@@ -18,6 +18,8 @@ import Image from 'next/image'
 import { Document, Page, pdfjs } from 'react-pdf'
 import 'react-pdf/dist/Page/AnnotationLayer.css'
 import 'react-pdf/dist/Page/TextLayer.css'
+import Carousel from './Carousel'
+import { useDeleteImageMutation } from '@/api/queries/projects'
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.mjs`
 
@@ -45,14 +47,14 @@ type DropZoneProps = {
     maxFiles?: number
     multiple?: boolean
 
-    /** Existing image URL (e.g. from server). Lower priority than a freshly picked file. */
-    imageUrl?: string
-    imageAlt?: string
+    images?: { src: string, alt: string }[]
     resumeUrl?: string
 
     files?: AcceptedFile[]
     onFilesChange?: (files: AcceptedFile[]) => void
     onError?: (message: string) => void
+
+    onCarouselDelete?: (src: string) => Promise<void>
 }
 
 /* ---------------------------------------------
@@ -136,12 +138,12 @@ const DropZone = ({
     maxSize = 10 * 1024 * 1024,
     maxFiles = 5,
     multiple = true,
-    imageUrl,
-    imageAlt = 'Uploaded image',
+    images,
     resumeUrl,
     files: controlledFiles,
     onFilesChange,
     onError,
+    onCarouselDelete,
 }: DropZoneProps) => {
     const id = useId()
     const inputRef = useRef<HTMLInputElement>(null)
@@ -164,33 +166,33 @@ const DropZone = ({
     const hasError = Boolean(error || internalError)
     const displayedError = error || internalError
 
-    // --------------------------------------------------------------
-    // Preview priority:
-    //   1. newly selected image file (blob preview)
-    //   2. existing imageUrl from server
-    // --------------------------------------------------------------
     const selectedFile = files.find(
         (f) => f.preview && f.file.type.startsWith('image/') || f.file.type === 'application/pdf',
     )
-    const previewUrl = selectedFile?.preview ?? imageUrl
-    const previewAlt = selectedFile?.file.name ?? imageAlt
-    const showPreview = Boolean(selectedFile || resumeUrl || imageUrl)
 
-    const isSelectedPdf = selectedFile?.file.type === 'application/pdf'
+    const serverImages = images || [];
+    const previewUrl = selectedFile?.preview ?? serverImages[0]?.src;
+    const previewAlt = selectedFile?.file.name ?? serverImages[0]?.alt;
+
     const useResumeUrl = !selectedFile && Boolean(resumeUrl)
 
-    const isPdf = Boolean(isSelectedPdf || useResumeUrl)
+    const newImageFiles = files.filter((f) => f.preview && f.file.type.startsWith('image/'))
+    const allImages = [
+        ...(images || []).map(img => ({ src: img.src, alt: img.alt })),
+        ...newImageFiles.map(f => ({ src: f.preview!, alt: f.file.name })),
+    ]
 
-    const documentFile = isSelectedPdf
-        ? selectedFile?.file
-        : useResumeUrl
-            ? resumeUrl
-            : undefined
+    const newPdfFile = files.find((f) => f.file.type === 'application/pdf')
 
-    // Files that don't have a renderable image preview (non-images, or images
-    // outside `files` we're already displaying). We still want to show them in
-    // the file list.
-    const listableFiles = files.filter((f) => f.id !== selectedFile?.id)
+    const isPdf = Boolean(newPdfFile || (!newImageFiles.length && useResumeUrl))
+
+    const documentFile = newPdfFile ? newPdfFile.file : resumeUrl
+
+    const showCarousel = allImages.length > 1
+    const showSinglePreview = allImages.length === 1
+    const showPreview = isPdf || showCarousel || showSinglePreview
+
+    const listableFiles = files.filter(f => !f.preview)
 
     const reportError = (msg: string) => {
         setInternalError(msg)
@@ -308,76 +310,102 @@ const DropZone = ({
         setInternalError('')
     }
 
+    const handleCarouselDelete = async (src: string) => {
+        if (images?.some(i => i.src === src)) {
+            await onCarouselDelete?.(src)
+        }
+
+        const fileToRemove = files.find(f => f.preview === src)
+        if (fileToRemove) {
+            removeFile(fileToRemove.id)
+        }
+    }
+
     /* -------------------------
        Render — Preview mode
        ------------------------- */
-    const renderPreview = () => (
-        <div
-            onDrop={onDrop}
-            onDragOver={onDragOver}
-            onDragEnter={onDragOver}
-            onDragLeave={onDragLeave}
-            className="space-y-3"
-        >
-            <div
-                className={[
-                    'group relative overflow-hidden rounded-lg border bg-surface-raised transition-all',
-                    isDragging ? 'border-accent ring-2 ring-accent/40' : 'border-border',
-                ].join(' ')}
-            >
-                {isPdf ? (
-                    <div className="pointer-events-none flex h-48 w-full items-start justify-center overflow-hidden bg-white">
-                        <Document
-                            file={documentFile as string | File}
-                            loading={<div className="text-sm font-mono text-black p-4">Loading PDF...</div>}
-                            error={<div className="text-sm font-mono text-danger p-4">Failed to load PDF.</div>}
-                        >
-                            <Page
-                                pageNumber={1}
-                                width={800}
-                                renderTextLayer={false}
-                                renderAnnotationLayer={false}
-                                className="w-full!" />
-                        </Document>
-                    </div>
-                ) : (
-                    <Image
-                        src={previewUrl!}
-                        alt={previewAlt}
-                        width={800}
-                        height={450}
-                        unoptimized={previewUrl?.startsWith('blob:')}
-                        className="pointer-events-none h-48 w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+    const renderPreview = () => {
+        if (showCarousel) {
+            return (
+                <div className="space-y-4">
+                    <Carousel
+                        images={allImages}
+                        type="edit"
+                        onDelete={handleCarouselDelete}
                     />
-                )}
+                    {/* Render the actual Drop Zone UI at the bottom */}
+                    {renderDropArea()}
+                </div>
+            )
+        }
 
-                {/* Change overlay */}
-                <button
-                    type="button"
-                    onClick={openPicker}
-                    disabled={disabled}
-                    className="absolute inset-0 z-10 flex cursor-pointer items-center justify-center gap-2 bg-black/0 font-mono text-sm font-medium text-transparent backdrop-blur-0 transition-all duration-200 group-hover:bg-black/50 group-hover:text-white group-hover:backdrop-blur-[2px] focus-visible:bg-black/50 focus-visible:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 disabled:cursor-not-allowed disabled:opacity-50"
+        return (
+            <div
+                onDrop={onDrop}
+                onDragOver={onDragOver}
+                onDragEnter={onDragOver}
+                onDragLeave={onDragLeave}
+                className="space-y-3"
+            >
+                <div
+                    className={[
+                        'group relative overflow-hidden rounded-lg border bg-surface-raised transition-all',
+                        isDragging ? 'border-accent ring-2 ring-accent/40' : 'border-border',
+                    ].join(' ')}
                 >
-                    <Pencil className="h-4 w-4" strokeWidth={2} />
-                    <span className="uppercase tracking-wider">Change</span>
-                </button>
+                    {isPdf ? (
+                        <div className="pointer-events-none flex h-48 w-full items-start justify-center overflow-hidden bg-white">
+                            <Document
+                                file={documentFile as string | File}
+                                loading={<div className="text-sm font-mono text-black p-4">Loading PDF...</div>}
+                                error={<div className="text-sm font-mono text-danger p-4">Failed to load PDF.</div>}
+                            >
+                                <Page
+                                    pageNumber={1}
+                                    width={800}
+                                    renderTextLayer={false}
+                                    renderAnnotationLayer={false}
+                                    className="w-full!" />
+                            </Document>
+                        </div>
+                    ) : showSinglePreview ? (
+                        <Image
+                            src={previewUrl!}
+                            alt={previewAlt}
+                            width={800}
+                            height={450}
+                            unoptimized={previewUrl?.startsWith('blob:')}
+                            className="pointer-events-none h-48 w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+                        />
+                    ) : null}
 
-                {/* Drop hint shown only while dragging over the preview */}
-                {isDragging && (
-                    <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-accent/10 backdrop-blur-[1px]">
-                        <span className="rounded-md bg-surface/90 px-3 py-1.5 font-mono text-xs uppercase tracking-wider text-accent">
-                            Drop to replace
-                        </span>
-                    </div>
-                )}
+                    {/* Change overlay */}
+                    <button
+                        type="button"
+                        onClick={openPicker}
+                        disabled={disabled}
+                        className="absolute inset-0 z-10 flex cursor-pointer items-center justify-center gap-2 bg-black/0 font-mono text-sm font-medium text-transparent backdrop-blur-0 transition-all duration-200 group-hover:bg-black/50 group-hover:text-white group-hover:backdrop-blur-[2px] focus-visible:bg-black/50 focus-visible:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                        <Pencil className="h-4 w-4" strokeWidth={2} />
+                        <span className="uppercase tracking-wider">Change</span>
+                    </button>
+
+                    {isDragging && (
+                        <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-accent/10 backdrop-blur-[1px]">
+                            <span className="rounded-md bg-surface/90 px-3 py-1.5 font-mono text-xs uppercase tracking-wider text-accent">
+                                Drop to replace
+                            </span>
+                        </div>
+                    )}
+                </div>
+
+                <p className="flex items-center justify-center gap-1.5 font-mono text-xs text-text-muted">
+                    <UploadCloud className="h-3.5 w-3.5" strokeWidth={1.75} />
+                    Drag &amp; drop a new file to update, or click the preview to browse.
+                </p>
             </div>
-
-            <p className="flex items-center justify-center gap-1.5 font-mono text-xs text-text-muted">
-                <UploadCloud className="h-3.5 w-3.5" strokeWidth={1.75} />
-                Drag &amp; drop a new image to update, or click the preview to browse.
-            </p>
-        </div>
-    )
+        )
+    }
 
     /* -------------------------
        Render — Drop area

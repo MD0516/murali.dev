@@ -3,13 +3,13 @@
 import { Project } from '@/types'
 import { Loader2, X } from 'lucide-react'
 import { Dialog } from 'radix-ui'
-import React, { ReactNode, useState } from 'react'
-import { Formik, Form, type FormikHelpers } from 'formik'
+import React, { ReactNode, useRef, useState } from 'react'
+import { Formik, Form, type FormikHelpers, FormikProps } from 'formik'
 import FormField from '../ui/FormField'
 import DropZone, { type AcceptedFile } from '../ui/DropZone'
 import TagInput from '../ui/TagInput'
 import { useUploadFileMutation } from '@/api/queries/upload'
-import { useCreateProjectMutation, useUpdateProjectMutation } from '@/api/queries/projects'
+import { useCreateProjectMutation, useDeleteImageMutation, useUpdateProjectMutation } from '@/api/queries/projects'
 import z from 'zod'
 import { CreateProjectPayload } from '@/lib/validators/project'
 import { isAxiosError } from 'axios'
@@ -19,7 +19,12 @@ const projectFormSchema = z.object({
   shortDescription: z.string().trim().min(1, 'Short description is required').max(160, 'Keep it under 160 characters').default(''),
   fullDescription: z.string().trim().min(1, 'Full description is required').default(''),
   techStack: z.array(z.string().trim().min(1)).min(1, 'Add at least one technology').default([]),
-  imageUrl: z.string().optional(),
+  images: z.array(
+    z.object({
+      src: z.string().min(1, "Image source is required"),
+      alt: z.string().min(1, "Image alt text is required"),
+    })
+  ),
   liveUrl: z.string().trim().url('Must be a valid URL').or(z.literal('')).optional().default(''),
   githubUrl: z.string().trim().url('Must be a valid URL').or(z.literal('')).optional().default(''),
   featured: z.boolean().default(false),
@@ -38,18 +43,21 @@ const ProjectFormModal = ({ project, children }: Props) => {
   const [imageFiles, setImageFiles] = useState<AcceptedFile[]>([])
   const [formError, setFormError] = useState<string | null>(null)
 
+  const formikRef = useRef<FormikProps<FormValues>>(null)
+
   const { mutateAsync: uploadImage, isPending: isUploadingImage } = useUploadFileMutation()
   const { mutateAsync: createProject, isPending: isCreatingProject } = useCreateProjectMutation()
   const { mutateAsync: updateProject, isPending: isUpdatingProject } = useUpdateProjectMutation()
+  const { mutateAsync: deleteImage, isPending: isDeletingImage } = useDeleteImageMutation();
 
-  const isLoading = isUploadingImage || isCreatingProject || isUpdatingProject
+  const isLoading = isUploadingImage || isCreatingProject || isUpdatingProject || isDeletingImage
 
   const initialValues: FormValues = {
     title: project?.title || '',
     shortDescription: project?.shortDescription || '',
     fullDescription: project?.fullDescription || '',
     techStack: project?.techStack || [],
-    imageUrl: project?.imageUrl || '',
+    images: project?.images || [],
     liveUrl: project?.liveUrl || '',
     githubUrl: project?.githubUrl || '',
     featured: project?.featured || false,
@@ -74,32 +82,35 @@ const ProjectFormModal = ({ project, children }: Props) => {
     setFormError(null)
 
     try {
-      let finalImageUrl = values.imageUrl
-
-      // 1. Upload image if a new file was selected
-      if (imageFiles.length > 0) {
-        const data = await uploadImage({ file: imageFiles[0].file, type: 'image' })
-        finalImageUrl = data.url
-      }
-
-      // 2. Manual check for image. If it fails, mark it touched so the error shows up!
-      if (!finalImageUrl) {
-        setFieldError('imageUrl', 'A cover image is required')
-        setFieldTouched('imageUrl', true, false)
+      if (!values.images.length && !imageFiles.length) {
+        setFieldError('images', 'At least one image is required')
+        setFieldTouched('images', true, false)
         return
       }
 
-      const payload: CreateProjectPayload = { ...values, imageUrl: finalImageUrl }
+      let finalImages = values.images
 
-      // 3. Create or Update
-      if (isEditMode) {
-        await updateProject({ id: project!._id, data: payload })
+      if (imageFiles.length > 0) {
+        const files = imageFiles.map((image) => image.file)
+        const uploadedImages = (await uploadImage({ files, type: "image" })).urls
+
+        const newImages = uploadedImages.map((url, index) => ({
+          src: url,
+          alt: files[index].name,
+        }))
+
+        finalImages = [...finalImages, ...newImages]
+      }
+
+      const payload: CreateProjectPayload = { ...values, images: finalImages }
+
+      if (project?._id) {
+        await updateProject({ id: project._id, data: payload })
       } else {
         await createProject({ data: payload })
       }
 
-      // 4. Cleanup & Close
-      handleClose(resetForm)
+      handleClose()
     } catch (error: unknown) {
       console.error("Failed to save project:", error)
 
@@ -113,13 +124,11 @@ const ProjectFormModal = ({ project, children }: Props) => {
     }
   }
 
-  const handleClose = (resetForm: () => void) => {
-    setOpen(false)
-    setFormError(null)
-    setTimeout(() => {
-      resetForm()
-      setImageFiles([])
-    }, 200)
+  const handleClose = () => {
+    setOpen(false);
+    setFormError(null);
+    setImageFiles([]);
+    formikRef.current?.resetForm();
   }
 
   const submitText = isEditMode
@@ -130,10 +139,10 @@ const ProjectFormModal = ({ project, children }: Props) => {
     <Dialog.Root
       open={open}
       onOpenChange={(next) => {
-        setOpen(next)
-        if (!next) {
-          setImageFiles([])
-          setFormError(null)
+        if (next) {
+          setOpen(next)
+        } else if (!isLoading) {
+          handleClose()
         }
       }}
     >
@@ -155,6 +164,7 @@ const ProjectFormModal = ({ project, children }: Props) => {
           </div>
 
           <Formik
+            innerRef={formikRef}
             initialValues={initialValues}
             validate={validate}
             onSubmit={handleSubmit}
@@ -172,27 +182,39 @@ const ProjectFormModal = ({ project, children }: Props) => {
                 )}
 
                 <div
-                  onBlur={() => setFieldTouched('imageUrl', true)}
-                  onClick={() => setFieldTouched('imageUrl', true)}
+                  onBlur={() => setFieldTouched('images', true)}
+                  onClick={() => setFieldTouched('images', true)}
                 >
                   <DropZone
                     name="image"
                     label="Upload image"
                     maxSize={5 * 1024 * 1024}
-                    maxFiles={1}
-                    multiple={false}
+                    multiple={true}
                     accept="image/png,image/jpeg,image/jpg,image/webp"
                     files={imageFiles}
                     onFilesChange={(files) => {
                       setImageFiles(files)
                       if (files.length > 0) {
-                        setFieldError('imageUrl', undefined)
+                        setFieldError('images', undefined)
                       }
                     }}
-                    imageUrl={values.imageUrl}
-                    imageAlt={values.title ? `Cover image for ${values.title}` : "Project cover image"}
-                    error={touched.imageUrl && typeof errors.imageUrl === 'string' ? errors.imageUrl : undefined}
+                    images={values.images}
+                    error={touched.images && typeof errors.images === 'string' ? errors.images : undefined}
                     required
+                    onCarouselDelete={
+                      async (src: string) => {
+                        if (!project?._id) return
+
+                        await deleteImage({ id: project._id, data: { imageUrl: src } })
+
+                        const updatedImages = values.images.filter(
+                          (image) => image.src !== src
+                        )
+
+                        await setFieldValue("images", updatedImages)
+                      }
+                    }
+                    maxFiles={10}
                   />
                 </div>
 
@@ -262,7 +284,7 @@ const ProjectFormModal = ({ project, children }: Props) => {
                 <div className="flex items-center justify-end gap-2 mt-4">
                   <button
                     type="button"
-                    onClick={() => handleClose(resetForm)}
+                    onClick={() => handleClose()}
                     className="btn btn-modal-cancel"
                     disabled={isLoading}
                   >

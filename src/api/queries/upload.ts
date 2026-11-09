@@ -7,18 +7,18 @@ import { upload } from "../endpoints";
 export const useUploadFileMutation = () => {
     return useMutation({
         mutationFn: async ({
-            file,
+            files,
             type,
         }: {
-            file: File;
+            files: File[];
             type: "image" | "resume";
         }) => {
-            const response = await upload.file(file, type);
+            const response = await upload.file(files, type);
             return response.data;
         },
 
-        onMutate: ({ type }) => {
-            const toastId = toast.loading(`Uploading ${type}...`);
+        onMutate: ({ files, type }) => {
+            const toastId = toast.loading(`Uploading ${type}${files.length > 1 ? 's' : ''}...`);
             return { toastId };
         },
 

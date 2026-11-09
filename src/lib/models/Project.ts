@@ -7,7 +7,9 @@ const projectSchema = new mongoose.Schema<IProject>(
         shortDescription: { type: String, required: true },
         fullDescription: { type: String, required: true },
         techStack: [{ type: String }],
-        imageUrl: { type: String, required: true },
+        images: [{
+            type: { src: String, alt: String }, required: true
+        }],
         liveUrl: { type: String },
         githubUrl: { type: String },
         featured: { type: Boolean, default: false },

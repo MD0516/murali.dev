@@ -284,8 +284,9 @@ const AboutEditModal = ({
     let finalResumeUrl = values?.resume
 
     if (resume.length > 0) {
-      const { url } = await uploadImage({ file: resume[0].file, type: 'resume' })
-      finalResumeUrl = url;
+      const files = resume.map(r => r.file)
+      const { urls } = await uploadImage({ files, type: 'resume' })
+      finalResumeUrl = urls[0];
     }
 
     try {

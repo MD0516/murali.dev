@@ -3,6 +3,7 @@ import { toast } from "sonner";
 
 import {
     CreateProjectPayload,
+    DeleteImagePayload,
     UpdateProjectPayload,
 } from "@/lib/validators/project";
 
@@ -10,6 +11,7 @@ import { ReorderPayload } from "@/lib/validators/common";
 
 import { project } from "../endpoints";
 import { queryKeys } from "./queryKeys";
+import { string } from "zod";
 
 
 export const useProjectsQuery = () => {
@@ -134,3 +136,34 @@ export const useReorderProjectsMutation = () => {
         },
     });
 };
+
+export const useDeleteImageMutation = () => {
+    const queryClient = useQueryClient()
+
+    return useMutation({
+        mutationFn: async ({
+            id, data
+        }: { id: string, data: DeleteImagePayload }) => project.deleteImage(id, data),
+
+        onMutate: () => {
+            const toastId = toast.loading("Deleting image...");
+            return { toastId }
+        },
+
+        onSuccess: (response, _variables, context) => {
+            toast.success(response.message || "Image deleted successfully", {
+                id: context.toastId
+            })
+
+            queryClient.invalidateQueries({
+                queryKey: queryKeys.projects,
+            });
+        },
+
+        onError: (error, _variables, context) => {
+            toast.success(error.message || "Failed to delete Image", {
+                id: context?.toastId
+            })
+        },
+    })
+}

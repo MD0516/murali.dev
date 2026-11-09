@@ -4,7 +4,10 @@ export interface Project {
     shortDescription: string;
     fullDescription: string;
     techStack: string[];
-    imageUrl: string;
+    images: {
+        src: string;
+        alt: string;
+    }[];
     liveUrl?: string;
     githubUrl?: string;
     featured: boolean;
