@@ -78,7 +78,7 @@ const ProjectCard = ({ project, type = 'default', onClick }: Prop) => {
           <div
             onPointerDown={e => e.stopPropagation}
             onClick={e => e.stopPropagation()}
-            className="btn btn-icon text-text-muted opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:text-code-accent"
+            className="btn btn-icon text-text-muted transition-all duration-300 group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:text-code-accent"
           >
             <ProjectFormModal project={project}>
               <Pencil
