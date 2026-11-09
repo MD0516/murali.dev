@@ -84,7 +84,7 @@ const Projects = () => {
             A few things I&apos;ve made.
           </h2>
           <div className="font-mono text-xs text-text-muted flex items-center gap-4">
-            <p>({projects?.length} projects)</p>
+            <p>({(projects?.length ?? 0).toString().padStart(2, '0')} projects)</p>
           </div>
         </motion.div>
       </motion.div>

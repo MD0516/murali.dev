@@ -44,7 +44,7 @@ const ProjectCard = ({ project, type = 'default', onClick }: Prop) => {
   // Guard clause for default/admin states if project is missing
   if (!project) return null
 
-  const order = project.order < 10 ? `0${project.order}` : project.order
+  const order = project.order.toString().padStart(2, '0')
 
   // 2. Base card content (shared between default and admin)
   const cardContent = (
