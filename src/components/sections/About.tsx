@@ -6,6 +6,7 @@ import { SkeletonTag, SkeletonText, SkeletonTimelineItem } from '../ui/Skeleton'
 import { FolderGit2, NotepadText } from 'lucide-react';
 import { useAppContext } from '@/context/context';
 import AboutEditModal from '../admin/AboutEditModal';
+import RichText from '../ui/RichText';
 
 const EmptyTimeline = () => (
   <motion.div
@@ -131,7 +132,7 @@ const About = () => {
         {showAboutSkeleton ? (
           <SkeletonText lines={6} />
         ) : (
-          <p className='whitespace-pre-line space-y-2'>{about?.bio}</p>
+          <RichText className="text-sm leading-7">{about?.bio}</RichText>
         )}
 
         {showAboutSkeleton ? (
@@ -229,9 +230,9 @@ const About = () => {
                 </div>
 
                 {item.description && (
-                  <p className="mt-3 text-xs leading-5 text-text-muted whitespace-pre-line space-y-2">
+                  <RichText className="mt-3 text-xs leading-5 text-text-muted">
                     {item.description}
-                  </p>
+                  </RichText>
                 )}
               </motion.article>
             ))

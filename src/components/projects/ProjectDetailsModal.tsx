@@ -6,6 +6,7 @@ import { GithubIcon } from '../ui/Icons';
 import Carousel from '../ui/Carousel';
 import { useAppContext } from '@/context/context';
 import ProjectFormModal from '../admin/ProjectFormModal';
+import RichText from '../ui/RichText';
 
 type Props = {
   Trigger: ReactNode;
@@ -68,18 +69,18 @@ const ProjectDetailsModal = ({
             </div>
 
             {/* Short Description */}
-            <p className="text-text-muted text-sm leading-6 mb-4 whitespace-pre-line space-y-2">
+            <RichText className="text-text-muted text-sm leading-6 mb-4">
               {project.shortDescription}
-            </p>
+            </RichText>
 
             {/* Full Description */}
             <div className="mb-6">
               <h3 className="font-mono text-xs text-code-accent mb-2">
                 $ cat description.txt
               </h3>
-              <p className="text-foreground text-sm leading-7 whitespace-pre-line space-y-2">
+              <RichText className="text-foreground text-sm leading-7">
                 {project.fullDescription}
-              </p>
+              </RichText>
             </div>
 
             {/* Tech Stack */}
