@@ -61,6 +61,7 @@ const SkillRow = ({ row, handleChange, deleteRow, exists }: SkillRowProps) => {
   }
 
   const SubmitText = exists ? "Update" : "Add";
+  const LoadingText = isCreating ? "Creating..." : "Updating...";
 
   return (
     <div className="bg-surface-raised flex flex-col gap-5 rounded-sm px-2 py-4">
@@ -99,7 +100,7 @@ const SkillRow = ({ row, handleChange, deleteRow, exists }: SkillRowProps) => {
           disabled={isLoading}
         >
           <Loader2 className={`mr-2 h-4 w-4 animate-spin ${isLoading ? 'inline-block' : 'hidden'}`} />
-          {isLoading ? "Uploading..." : SubmitText}
+          {isLoading ? LoadingText : SubmitText}
         </button>
       </div>
     </div>
