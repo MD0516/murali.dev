@@ -68,7 +68,7 @@ const ProjectDetailsModal = ({
             </div>
 
             {/* Short Description */}
-            <p className="text-text-muted text-sm leading-6 mb-4 whitespace-pre-wrap space-y-2">
+            <p className="text-text-muted text-sm leading-6 mb-4 whitespace-pre-line space-y-2">
               {project.shortDescription}
             </p>
 
@@ -77,7 +77,7 @@ const ProjectDetailsModal = ({
               <h3 className="font-mono text-xs text-code-accent mb-2">
                 $ cat description.txt
               </h3>
-              <p className="text-foreground text-sm leading-7 whitespace-pre-wrap space-y-2">
+              <p className="text-foreground text-sm leading-7 whitespace-pre-line space-y-2">
                 {project.fullDescription}
               </p>
             </div>

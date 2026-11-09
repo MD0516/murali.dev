@@ -131,7 +131,7 @@ const About = () => {
         {showAboutSkeleton ? (
           <SkeletonText lines={6} />
         ) : (
-          <p className='whitespace-pre-wrap space-y-2'>{about?.bio}</p>
+          <p className='whitespace-pre-line space-y-2'>{about?.bio}</p>
         )}
 
         {showAboutSkeleton ? (
@@ -229,7 +229,7 @@ const About = () => {
                 </div>
 
                 {item.description && (
-                  <p className="mt-3 text-xs leading-5 text-text-muted whitespace-pre-wrap space-y-2">
+                  <p className="mt-3 text-xs leading-5 text-text-muted whitespace-pre-line space-y-2">
                     {item.description}
                   </p>
                 )}
