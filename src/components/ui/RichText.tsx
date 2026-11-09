@@ -16,8 +16,8 @@ export default function RichText({
             <ReactMarkdown
                 remarkPlugins={[remarkGfm, remarkBreaks]}
                 components={{
-                    p: ({ children }) => <p className="mb-3 last:mb-0">{children}</p>,
-                    ul: ({ children }) => <ul className="list-disc pl-4 space-y-1 mb-3">{children}</ul>,
+                    p: ({ children }) => <p className="mb-3 last:mb-0 text-justify">{children}</p>,
+                    ul: ({ children }) => <ul className="list-disc pl-4 space-y-1 mb-3 text-justify">{children}</ul>,
                     a: ({ children, href }) => (
                         <a href={href} target="_blank" rel="noopener noreferrer" className="underline">
                             {children}
