@@ -102,7 +102,7 @@ const About = () => {
         transition={{ delay: 0.6, duration: 0.6 }}
         className='p-6 overflow-hidden rounded-xl border border-border bg-surface shadow-[0_0_20px_color-mix(in_srgb,var(--color-code-accent)_30%,transparent)] font-mono text-sm leading-7'
       >
-        <div className='flex gap-2 text-xs'>
+        <div className='inline-flex gap-2 max-[321px]:flex-col text-xs'>
           {showAboutSkeleton ? (
             <>
               <SkeletonTag width='5rem' />

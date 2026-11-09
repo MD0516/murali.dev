@@ -31,7 +31,7 @@ const ProjectCard = ({ project, type = 'default', onClick }: Prop) => {
       <motion.button
         type="button"
         onClick={onClick}
-        className="w-full min-h-full flex flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed border-border hover:border-code-accent hover:bg-secondary/50 transition-all duration-300 cursor-pointer text-text-muted hover:text-code-accent group"
+        className="w-full h-50 sm:min-h-full flex flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed border-border hover:border-code-accent hover:bg-secondary/50 transition-all duration-300 cursor-pointer text-text-muted hover:text-code-accent group"
       >
         <div className="flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
           <Plus size={24} strokeWidth={1.5} />

@@ -78,7 +78,7 @@ const Projects = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ delay: 0.3, duration: 0.6 }}
-          className='flex justify-between items-center mb-10'
+          className='flex justify-between items-center mb-10 max-sm:flex-col max-sm:items-start max-sm:gap-2'
         >
           <h2 className='text-3xl font-medium tracking-[0.04em] text-foreground'>
             A few things I&apos;ve made.

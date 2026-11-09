@@ -56,7 +56,7 @@ const Contact = () => {
   useEffect(() => {
     if (!isInView) return
 
-    const command = './send-message --to murali';
+    const command = './send-message --to-murali';
     let charIndex = 0;
     let typeTimer: ReturnType<typeof setInterval>;
     let outputTimer: ReturnType<typeof setTimeout>;
@@ -211,7 +211,7 @@ const Contact = () => {
                   initial={{ opacity: 0, y: 5 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3 }}
-                  className='text-text-muted'
+                  className='text-text-muted max-[321px]:mt-8'
                 >
                   <span>&gt; </span>
                   <span>Waiting for input... </span>
