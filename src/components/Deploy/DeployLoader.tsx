@@ -8,27 +8,36 @@ type Props = {
 
 const logs = [
     { text: "$ npm run build", type: "command" },
-    { text: "> portfolio-404@1.0.0 build", type: "info" },
+    { text: "> murali.dev@0.1.0 build", type: "info" },
     { text: "> next build", type: "info" },
     { text: "", type: "empty" },
-    { text: "   Creating an optimized production build...", type: "info" },
-    { text: " ✓ Compiled successfully", type: "success" },
-    { text: " ✓ Generating static pages (2/2)", type: "success" },
-    { text: " ✓ Collecting page data", type: "info" },
-    { text: " ✓ Finalizing page optimization", type: "info" },
+    { text: "▲ Next.js 16.4.3 (Turbopack)", type: "accent" },
+    { text: "- Environments: .env", type: "info" },
     { text: "", type: "empty" },
-    { text: "Route (app)                    Size     First Load JS", type: "info" },
-    { text: "┌ ○ /                        2.1 kB          78.4 kB", type: "info" },
-    { text: "└ ○ /_not-found              872 B          77.2 kB", type: "info" },
+    { text: "Creating an optimized production build ...", type: "info" },
+    { text: "✓ Compiled successfully in 6.8s", type: "success" },
+    { text: "Running TypeScript ...", type: "info" },
+    { text: "✓ Finished TypeScript in 6.4s", type: "success" },
+    { text: "Collecting page data using 11 workers ...", type: "info" },
+    { text: "✓ Collecting page data using 11 workers", type: "success" },
+    { text: "Generating static pages (16/16) ...", type: "info" },
+    { text: "✓ Generating static pages (16/16)", type: "success" },
+    { text: "✓ Finalizing page optimization", type: "success" },
     { text: "", type: "empty" },
-    { text: "○  (Static)   prerendered as static content", type: "muted" },
+    { text: "Route (app)", type: "info" },
+    { text: "├ ○ /", type: "success" },
+    { text: "├ ○ /_not-found", type: "success" },
+    { text: "├ ƒ /api/projects", type: "info" },
+    { text: "├ ƒ /api/skills", type: "info" },
+    { text: "├ ƒ /api/timeline", type: "info" },
+    { text: "├ ƒ /api/contact", type: "info" },
+    { text: "└ ○ /opengraph-image", type: "success" },
     { text: "", type: "empty" },
-    { text: "Deploying to production...", type: "accent" },
-    { text: " ✓ Uploading build artifacts", type: "success" },
-    { text: " ✓ Configuring CDN", type: "success" },
-    { text: " ✓ Setting up HTTPS certificates", type: "success" },
-    { text: " ✓ Deployment successful!", type: "success" },
-];
+    { text: "○ (Static) prerendered as static content", type: "muted" },
+    { text: "ƒ (Dynamic) server-rendered on demand", type: "muted" },
+    { text: "", type: "empty" },
+    { text: "✓ Production build completed successfully!", type: "success" },
+]
 
 const DeployLoader = ({
     onComplete
@@ -76,7 +85,7 @@ const DeployLoader = ({
             >
                 <ThemeToggle />
             </motion.div>
-            
+
             <motion.div
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -98,7 +107,7 @@ const DeployLoader = ({
                         live
                     </motion.span>
                 </motion.div>
-                
+
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -137,7 +146,7 @@ const DeployLoader = ({
                             deploy.sh
                         </motion.span>
                     </div>
-                    
+
                     <div
                         className="h-87.5 sm:h-100 overflow-y-auto font-mono p-6 text-xs sm:text-sm sm:p-10 [&::-webkit-scrollbar]:hidden scrollbar-none transition-all"
                         ref={terminalRef}
@@ -152,24 +161,24 @@ const DeployLoader = ({
                                     className="inline-block w-0.75 h-3.25 bg-code-accent cursor-blink"
                                 />
                             )}
-                            
+
                             {logs.slice(0, visibleLogs).map((log, i) => (
                                 <motion.span
                                     key={`log-${i}-${log.text}`}
                                     initial={{ opacity: 0, x: -10, y: 5 }}
                                     animate={{ opacity: 1, x: 0, y: 0 }}
                                     exit={{ opacity: 0, x: 10 }}
-                                    transition={{ 
-                                        duration: 0.4, 
+                                    transition={{
+                                        duration: 0.4,
                                         ease: [0.4, 0, 0.2, 1],
-                                        delay: i === visibleLogs - 1 ? 0.1 : 0 
+                                        delay: i === visibleLogs - 1 ? 0.1 : 0
                                     }}
                                     className={`block log-${log.type}`}
                                 >
                                     {log.text}
                                 </motion.span>
                             ))}
-                            
+
                             {visibleLogs >= logs.length && (
                                 <motion.span
                                     initial={{ opacity: 0 }}
@@ -180,7 +189,7 @@ const DeployLoader = ({
                             )}
                         </AnimatePresence>
                     </div>
-                    
+
                     <div className="relative h-0.5 w-full bg-border">
                         <motion.div
                             className='h-full bg-code-accent'

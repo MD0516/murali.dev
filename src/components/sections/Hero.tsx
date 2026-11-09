@@ -8,19 +8,22 @@ import { getDownloadUrl } from '@vercel/blob'
 
 const sequence = [
   { type: "command", text: "whoami" },
-  { type: "output", text: "murali dharan" },
+  { type: "output", text: "Murali Dharan" },
 
   { type: "command", text: "cat role.txt" },
-  { type: "output", text: "Full Stack Developer (MERN)" },
+  { type: "output", text: "Full Stack Developer" },
 
-  { type: "command", text: "cat skills.txt" },
-  { type: "output", text: "React · Node.js · Express · MongoDB" },
+  { type: "command", text: "cat stack.json" },
+  { type: "output", text: "JavaScript · TypeScript · Node.js · PHP" },
+
+  { type: "command", text: "cat backend.txt" },
+  { type: "output", text: "Express · Laravel · MongoDB · PostgreSQL" },
 
   { type: "command", text: "cat location.txt" },
   { type: "output", text: "Chennai, India" },
 
   { type: "command", text: "git log --oneline -1" },
-  { type: "output", text: "Built an LMS with JWT/RBAC auth + 100 REST APIs" },
+  { type: "output", text: "Building products, one commit at a time." },
 
   { type: "command", text: "echo $STATUS" },
   { type: "output", text: "shipping code, always learning" },
