@@ -3,7 +3,12 @@ import { cookies } from "next/headers";
 import { UnauthorizedError } from "./errors";
 
 const secret = new TextEncoder().encode(process.env.JWT_SECRET);
-const COOKIE_NAME = "__Host-md_admin_session";
+const isProduction = process.env.NODE_ENV === "production";
+
+const COOKIE_NAME = isProduction
+    ? "__Host-md_admin_session"
+    : "md_admin_session";
+    
 const duration = (rememberMe: boolean): number => {
     return rememberMe ? 60 * 60 * 24 * 7 : 60 * 60 * 24 * 1
 }

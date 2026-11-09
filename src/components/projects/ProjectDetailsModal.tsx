@@ -1,9 +1,11 @@
 import { Project } from '@/types';
 import { Dialog } from 'radix-ui'
 import { ReactNode } from 'react'
-import { X, ExternalLink, ArrowUpRight } from 'lucide-react'
+import { X, ExternalLink, ArrowUpRight, Pencil } from 'lucide-react'
 import { GithubIcon } from '../ui/Icons';
 import Carousel from '../ui/Carousel';
+import { useAppContext } from '@/context/context';
+import ProjectFormModal from '../admin/ProjectFormModal';
 
 type Props = {
   Trigger: ReactNode;
@@ -14,6 +16,7 @@ const ProjectDetailsModal = ({
   Trigger,
   project
 }: Props) => {
+  const { isAdmin } = useAppContext()
   return (
     <Dialog.Root>
       <Dialog.Trigger asChild>
@@ -106,7 +109,7 @@ const ProjectDetailsModal = ({
                   className="group inline-flex items-center gap-2 rounded-md bg-sidebar-primary px-4 py-2.5 font-mono text-xs text-page transition-all duration-300 hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-code-accent cursor-pointer"
                 >
                   <ExternalLink size={14} />
-                  Live Demo
+                  Live Preview
                   <ArrowUpRight size={12} className="transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                 </a>
               )}
@@ -121,6 +124,21 @@ const ProjectDetailsModal = ({
                   GitHub Repo
                   <ArrowUpRight size={12} className="transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                 </a>
+              )}
+              {isAdmin && (
+                <div
+                  onPointerDown={e => e.stopPropagation}
+                  onClick={e => e.stopPropagation()}
+                >
+                  <ProjectFormModal project={project}>
+                    <div className='group inline-flex items-center gap-2 rounded-md border border-border px-4 py-2.5 font-mono text-xs text-foreground transition-all duration-300 hover:bg-code-accent/40 focus:outline-none focus:ring-2 focus:ring-code-accent cursor-pointer'>
+                      <Pencil
+                        size={16}
+                      />
+                      Edit Project
+                    </div>
+                  </ProjectFormModal>
+                </div>
               )}
             </div>
           </div>

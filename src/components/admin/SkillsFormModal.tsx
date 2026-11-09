@@ -57,7 +57,7 @@ const SkillRow = ({ row, handleChange, deleteRow, exists }: SkillRowProps) => {
 
   const handleDelete = (id: string) => {
     deleteRow(id)
-    if(exists) deleteSkill({ id })
+    if (exists) deleteSkill({ id })
   }
 
   const SubmitText = exists ? "Update" : "Add";
@@ -80,6 +80,7 @@ const SkillRow = ({ row, handleChange, deleteRow, exists }: SkillRowProps) => {
         onChange={(skills) =>
           handleChange(row.id, 'skills', skills)
         }
+        hint="Press Enter or comma to add"
       />
       <div
         className='w-full flex items-center justify-end gap-3'
@@ -194,23 +195,24 @@ const SkillsFormModal = ({
 
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50" />
-        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-2xl max-h-[80vh] overflow-auto rounded-xl border border-border bg-surface shadow-[0_0_50px_color-mix(in_srgb,var(--code-accent)_20%,transparent)]">
+        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-2xl max-h-[80vh] overflow-hidden rounded-xl border border-border bg-surface shadow-[0_0_50px_color-mix(in_srgb,var(--code-accent)_20%,transparent)]">
           <div className="flex items-center justify-between p-4 border-b border-border">
             <h1 className="text-lg font-medium text-foreground ">
               Manage Skills
             </h1>
-            <Dialog.Close className="cursor-pointer rounded-sm p-1 text-text-muted hover:text-code-accent transition-colors duration-200">
-              <X size={20} />
-            </Dialog.Close>
+            <div className='flex justify-end gap-4'>
+              <button className='btn btn-icon-text' onClick={addNewCategory}>
+                <Plus size={15} /> Add Category
+              </button>
+              <Dialog.Close className="cursor-pointer rounded-sm p-1 text-text-muted hover:text-code-accent transition-colors duration-200">
+                <X size={20} />
+              </Dialog.Close>
+            </div>
           </div>
 
-          <div className='p-4 pt-0'>
+          <div className='p-4 pt-6 overflow-y-auto max-h-[calc(80vh-48px)]'>
             <div className="text-sm text-text-muted font-mono">
-              <div className='flex justify-end my-5'>
-                <button className='btn btn-icon-text' onClick={addNewCategory}>
-                  <Plus size={15} /> Add Category
-                </button>
-              </div>
+
               <div className='flex flex-col gap-5'>
                 {
                   skillRows.map((row) => {

@@ -152,7 +152,7 @@ const ProjectFormModal = ({ project, children }: Props) => {
 
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50" />
-        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-2xl max-h-[80vh] overflow-auto rounded-xl border border-border bg-surface shadow-[0_0_50px_color-mix(in_srgb,var(--code-accent)_20%,transparent)]">
+        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-2xl max-h-[80vh] overflow-hidden rounded-xl border border-border bg-surface shadow-[0_0_50px_color-mix(in_srgb,var(--code-accent)_20%,transparent)]">
 
           <div className="flex items-center justify-between p-4 border-b border-border">
             <h1 className="text-lg font-medium text-foreground">
@@ -162,146 +162,147 @@ const ProjectFormModal = ({ project, children }: Props) => {
               <X size={20} />
             </Dialog.Close>
           </div>
+          <div className='pb-5 overflow-y-auto max-h-[calc(80vh-48px)]'>
+            <Formik
+              innerRef={formikRef}
+              initialValues={initialValues}
+              validate={validate}
+              onSubmit={handleSubmit}
+              enableReinitialize
+              validateOnMount={false}
+              validateOnBlur
+              validateOnChange
+            >
+              {({ values, errors, touched, handleChange, setFieldValue, setFieldTouched, setFieldError }) => (
+                <Form noValidate className="p-4 space-y-4">
+                  {formError && (
+                    <div className="p-3 text-sm text-danger bg-danger/10 border border-danger/20 rounded-md">
+                      {formError}
+                    </div>
+                  )}
 
-          <Formik
-            innerRef={formikRef}
-            initialValues={initialValues}
-            validate={validate}
-            onSubmit={handleSubmit}
-            enableReinitialize
-            validateOnMount={false}
-            validateOnBlur
-            validateOnChange
-          >
-            {({ values, errors, touched, handleChange, setFieldValue, setFieldTouched, setFieldError }) => (
-              <Form noValidate className="p-4 space-y-4">
-                {formError && (
-                  <div className="p-3 text-sm text-danger bg-danger/10 border border-danger/20 rounded-md">
-                    {formError}
+                  <div
+                    onBlur={() => setFieldTouched('images', true)}
+                    onClick={() => setFieldTouched('images', true)}
+                  >
+                    <DropZone
+                      name="image"
+                      label="Upload image"
+                      maxSize={5 * 1024 * 1024}
+                      multiple={true}
+                      accept="image/png,image/jpeg,image/jpg,image/webp"
+                      files={imageFiles}
+                      onFilesChange={(files) => {
+                        setImageFiles(files)
+                        if (files.length > 0) {
+                          setFieldError('images', undefined)
+                        }
+                      }}
+                      images={values.images}
+                      error={touched.images && typeof errors.images === 'string' ? errors.images : undefined}
+                      required
+                      onCarouselDelete={
+                        async (src: string) => {
+                          if (!project?._id) return
+
+                          await deleteImage({ id: project._id, data: { imageUrl: src } })
+
+                          const updatedImages = values.images.filter(
+                            (image) => image.src !== src
+                          )
+
+                          await setFieldValue("images", updatedImages)
+                        }
+                      }
+                      maxFiles={10}
+                    />
                   </div>
-                )}
 
-                <div
-                  onBlur={() => setFieldTouched('images', true)}
-                  onClick={() => setFieldTouched('images', true)}
-                >
-                  <DropZone
-                    name="image"
-                    label="Upload image"
-                    maxSize={5 * 1024 * 1024}
-                    multiple={true}
-                    accept="image/png,image/jpeg,image/jpg,image/webp"
-                    files={imageFiles}
-                    onFilesChange={(files) => {
-                      setImageFiles(files)
-                      if (files.length > 0) {
-                        setFieldError('images', undefined)
-                      }
-                    }}
-                    images={values.images}
-                    error={touched.images && typeof errors.images === 'string' ? errors.images : undefined}
+                  <FormField
+                    label="Project Name"
+                    name="title"
+                    value={values.title}
+                    onChange={handleChange}
+                    error={touched.title && typeof errors.title === 'string' ? errors.title : undefined}
                     required
-                    onCarouselDelete={
-                      async (src: string) => {
-                        if (!project?._id) return
-
-                        await deleteImage({ id: project._id, data: { imageUrl: src } })
-
-                        const updatedImages = values.images.filter(
-                          (image) => image.src !== src
-                        )
-
-                        await setFieldValue("images", updatedImages)
-                      }
-                    }
-                    maxFiles={10}
                   />
-                </div>
 
-                <FormField
-                  label="Project Name"
-                  name="title"
-                  value={values.title}
-                  onChange={handleChange}
-                  error={touched.title && typeof errors.title === 'string' ? errors.title : undefined}
-                  required
-                />
+                  <FormField
+                    label="Short Description"
+                    name="shortDescription"
+                    value={values.shortDescription}
+                    onChange={handleChange}
+                    error={touched.shortDescription && typeof errors.shortDescription === 'string' ? errors.shortDescription : undefined}
+                    required
+                  />
 
-                <FormField
-                  label="Short Description"
-                  name="shortDescription"
-                  value={values.shortDescription}
-                  onChange={handleChange}
-                  error={touched.shortDescription && typeof errors.shortDescription === 'string' ? errors.shortDescription : undefined}
-                  required
-                />
+                  <FormField
+                    label="Full Description"
+                    name="fullDescription"
+                    value={values.fullDescription}
+                    type="textarea"
+                    onChange={handleChange}
+                    error={touched.fullDescription && typeof errors.fullDescription === 'string' ? errors.fullDescription : undefined}
+                    required
+                  />
 
-                <FormField
-                  label="Full Description"
-                  name="fullDescription"
-                  value={values.fullDescription}
-                  type="textarea"
-                  onChange={handleChange}
-                  error={touched.fullDescription && typeof errors.fullDescription === 'string' ? errors.fullDescription : undefined}
-                  required
-                />
+                  <TagInput
+                    label="Tech Stack"
+                    value={values.techStack}
+                    onChange={(tags) => setFieldValue('techStack', tags)}
+                    suggestions={['React', 'Next.js', 'TypeScript', 'Node.js', 'Tailwind CSS']}
+                    placeholder="Add a technology..."
+                    hint="Press Enter or comma to add"
+                    error={touched.techStack && typeof errors.techStack === 'string' ? errors.techStack : undefined}
+                    required
+                  />
 
-                <TagInput
-                  label="Tech Stack"
-                  value={values.techStack}
-                  onChange={(tags) => setFieldValue('techStack', tags)}
-                  suggestions={['React', 'Next.js', 'TypeScript', 'Node.js', 'Tailwind CSS']}
-                  placeholder="Add a technology..."
-                  hint="Press Enter or comma to add"
-                  error={touched.techStack && typeof errors.techStack === 'string' ? errors.techStack : undefined}
-                  required
-                />
+                  <FormField
+                    label="Live URL"
+                    name="liveUrl"
+                    value={values.liveUrl || ""}
+                    onChange={handleChange}
+                    error={touched.liveUrl && typeof errors.liveUrl === 'string' ? errors.liveUrl : undefined}
+                  />
 
-                <FormField
-                  label="Live URL"
-                  name="liveUrl"
-                  value={values.liveUrl || ""}
-                  onChange={handleChange}
-                  error={touched.liveUrl && typeof errors.liveUrl === 'string' ? errors.liveUrl : undefined}
-                />
+                  <FormField
+                    label="GitHub URL"
+                    name="githubUrl"
+                    value={values.githubUrl || ""}
+                    onChange={handleChange}
+                    error={touched.githubUrl && typeof errors.githubUrl === 'string' ? errors.githubUrl : undefined}
+                  />
 
-                <FormField
-                  label="GitHub URL"
-                  name="githubUrl"
-                  value={values.githubUrl || ""}
-                  onChange={handleChange}
-                  error={touched.githubUrl && typeof errors.githubUrl === 'string' ? errors.githubUrl : undefined}
-                />
+                  <FormField
+                    label="Featured"
+                    name="featured"
+                    type="checkbox"
+                    checked={values.featured}
+                    onChange={handleChange}
+                  />
 
-                <FormField
-                  label="Featured"
-                  name="featured"
-                  type="checkbox"
-                  checked={values.featured}
-                  onChange={handleChange}
-                />
-
-                <div className="flex items-center justify-end gap-2 mt-4">
-                  <button
-                    type="button"
-                    onClick={() => handleClose()}
-                    className="btn btn-modal-cancel"
-                    disabled={isLoading}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="btn btn-modal-save"
-                    disabled={isLoading}
-                  >
-                    <Loader2 className={`mr-2 h-4 w-4 animate-spin ${isLoading ? 'inline-block' : 'hidden'}`} />
-                    {isUploadingImage ? "Uploading..." : submitText}
-                  </button>
-                </div>
-              </Form>
-            )}
-          </Formik>
+                  <div className="flex items-center justify-end gap-2 mt-4">
+                    <button
+                      type="button"
+                      onClick={() => handleClose()}
+                      className="btn btn-modal-cancel"
+                      disabled={isLoading}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="btn btn-modal-save"
+                      disabled={isLoading}
+                    >
+                      <Loader2 className={`mr-2 h-4 w-4 animate-spin ${isLoading ? 'inline-block' : 'hidden'}`} />
+                      {isUploadingImage ? "Uploading..." : submitText}
+                    </button>
+                  </div>
+                </Form>
+              )}
+            </Formik>
+          </div>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>
