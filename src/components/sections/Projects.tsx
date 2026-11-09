@@ -84,7 +84,7 @@ const Projects = () => {
             A few things I&apos;ve made.
           </h2>
           <div className="font-mono text-xs text-text-muted flex items-center gap-4">
-            <p>(03 projects)</p>
+            <p>({projects?.length} projects)</p>
           </div>
         </motion.div>
       </motion.div>
